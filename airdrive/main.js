@@ -524,35 +524,15 @@ if (!reduced) {
   });
 }
 
-/* HUD phase */
-const phaseEl = document.getElementById('hud-phase');
-document.querySelectorAll('.sec[data-phase]').forEach((sec) => {
-  ScrollTrigger.create({
-    trigger: sec, start: 'top 55%', end: 'bottom 55%',
-    onToggle: (self) => { if (self.isActive) phaseEl.textContent = sec.dataset.phase; },
-  });
-});
-
 /* content reveals */
 if (!reduced) {
   document.documentElement.classList.add('fx');
   document.querySelectorAll('.reveal').forEach((el) => {
     gsap.to(el, {
       opacity: 1, y: 0, duration: 1.1, ease: 'power3.out',
-      scrollTrigger: { trigger: el, start: 'top 82%' },
+      scrollTrigger: { trigger: el, start: 'top 96%' },
     });
   });
-}
-
-/* tickers */
-for (const [id, dir] of [['ticker-a', -1], ['ticker-b', 1]]) {
-  const track = document.getElementById(id);
-  track.innerHTML += track.innerHTML;
-  if (!reduced) {
-    gsap.fromTo(track,
-      { xPercent: dir === 1 ? -50 : 0 },
-      { xPercent: dir === 1 ? 0 : -50, duration: dir === 1 ? 44 : 26, ease: 'none', repeat: -1 });
-  }
 }
 
 /* language toggle — swaps every [data-en] node, caches KR on first flip */
@@ -563,27 +543,15 @@ for (const [id, dir] of [['ticker-a', -1], ['ticker-b', 1]]) {
     lang = lang === 'ko' ? 'en' : 'ko';
     document.documentElement.lang = lang;
     btn.textContent = lang === 'ko' ? 'EN' : '한국어';
+    btn.setAttribute('aria-label', lang === 'ko' ? 'Switch to English' : '한국어로 보기');
     document.querySelectorAll('[data-en]').forEach((el) => {
       if (!el.dataset.ko) el.dataset.ko = el.innerHTML;
       el.innerHTML = lang === 'en' ? el.dataset.en : el.dataset.ko;
     });
     document.title = lang === 'en'
-      ? 'AIRDRIVE — a fighter-jet roguelite flown by bare hands'
-      : 'AIRDRIVE — 손으로 조종하는 전투기 로그라이트';
+      ? 'AIRDRIVE — a fighter-jet roguelite flown by hand gestures'
+      : 'AIRDRIVE — 손동작으로 조종하는 전투기 로그라이트';
   });
-}
-
-/* boot sequence */
-{
-  const boot = document.getElementById('boot');
-  const lines = boot.querySelectorAll('.boot-line');
-  const fill = document.getElementById('boot-fill');
-  const btl = gsap.timeline({ onComplete: () => boot.remove() });
-  btl.set(lines, { opacity: 0 });
-  btl.to(lines, { opacity: 1, duration: 0.06, stagger: 0.22, ease: 'none' });
-  btl.to(fill, { width: '100%', duration: 0.9, ease: 'power1.inOut' }, 0.1);
-  btl.to(boot, { opacity: 0, duration: 0.5, ease: 'power2.in' }, '+=0.35');
-  if (reduced) btl.progress(1);
 }
 
 /* ═════════════ HUD / RADAR / LOCK-ON / CURSOR ═════════════ */
@@ -662,10 +630,10 @@ function frame() {
   scrollVel += ((scrollY - lastScroll) - scrollVel) * 0.08;
   lastScroll = scrollY;
   const kt = Math.round(248 + F.speed * 90 + Math.abs(scrollVel) * 2.2);
-  spdEl.textContent = String(Math.min(kt, 9999)).padStart(4, '0');
+  if (spdEl) spdEl.textContent = String(Math.min(kt, 9999)).padStart(4, '0');
   const prog = document.documentElement.scrollHeight > innerHeight
     ? scrollY / (document.documentElement.scrollHeight - innerHeight) : 0;
-  altEl.textContent = String(Math.round(11200 + prog * 26800)).padStart(5, '0');
+  if (altEl) altEl.textContent = String(Math.round(11200 + prog * 26800)).padStart(5, '0');
 
   pSmooth.x += (pointer.x - pSmooth.x) * (1 - Math.exp(-dt * 6));
   pSmooth.y += (pointer.y - pSmooth.y) * (1 - Math.exp(-dt * 6));

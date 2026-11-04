@@ -107,7 +107,7 @@ a.item .state{background:var(--fg);color:var(--bg);border-color:var(--fg)}
           <p>손을 기울여 전투기를 조종하는 맨손 비행 액션 로그라이트.</p>
         </div>
         <div class="buy-act">
-          <a class="btn" href="https://store.steampowered.com/app/4711010/AirDrive_Demo/" target="_blank" rel="noopener">Steam 데모 플레이 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 13L13 3M5 3h8v8"/></svg></a>
+          <a class="btn" href="https://store.steampowered.com/app/4711010/AirDrive_Demo/" target="_blank" rel="noopener">Steam 데모 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 13L13 3M5 3h8v8"/></svg></a>
           <a class="btn line" href="../airdrive/">게임 자세히</a>
         </div>
       </div>
@@ -129,7 +129,7 @@ a.item .state{background:var(--fg);color:var(--bg);border-color:var(--fg)}
       </div>
       <div class="look-side">
         <div class="callsigns" role="group" aria-label="콜사인 선택" id="calls"></div>
-        <div class="look-copy"><strong id="callLine"></strong><p>회차마다 파츠와 패시브가 쌓여 기체가 다른 병기로 바뀝니다.</p></div>
+        <div class="look-copy"><strong id="callLine"></strong><p>회차마다 파츠와 패시브 조합이 달라집니다.</p></div>
         <table class="spec">
           <caption class="sr">AIRDRIVE 조작과 파츠</caption>
           <tbody>
@@ -145,7 +145,7 @@ a.item .state{background:var(--fg);color:var(--bg);border-color:var(--fg)}
   </section>
 
   <section class="sec" id="careers" aria-labelledby="careers-title">
-    <h2 class="sec-h ko" id="careers-title">좋은 게임은 좋은 사람들로부터 시작됩니다.</h2>
+    <h2 class="sec-h ko" id="careers-title">채용 중</h2>
     <ul class="jobs">
       <li><a href="../apply.html?position=Game%20Client%20Engineer"><b>Game Client Engineer</b><span>Engineering</span><span>정규직</span></a></li>
       <li><a href="../apply.html?position=2D%20Pixel%20Artist"><b>2D Pixel Artist</b><span>Art</span><span>정규직</span></a></li>
@@ -205,7 +205,7 @@ function renderShelf(list) {
   shelf.innerHTML = slots.map(s => {
     if (!s.link) return `<div class="item soon">
       <div class="item-thumb"><img src="../images/rabbit-white.png" alt="" loading="lazy"></div>
-      <div class="item-body"><h3>Next</h3><span class="state">준비 중</span><span class="type">다음 게임을 만들고 있습니다</span></div></div>`;
+      <div class="item-body"><h3>Next</h3><span class="state">준비 중</span><span class="type">다음 게임 제작 중</span></div></div>`;
     const ext = /^https?:/.test(s.link);
     return `<a class="item" href="${esc(siteUrl(s.link))}"${ext ? ' target="_blank" rel="noopener"' : ''}>
       <div class="item-thumb">${s.thumbnail ? `<img src="${esc(siteUrl(s.thumbnail))}" alt="" loading="lazy">` : ''}</div>
@@ -223,11 +223,11 @@ subscribeConfig(cfg => {
 
 // 콜사인 선택: 상품 옵션처럼 고른다
 const calls = [
-  ['A', 'APEX-S', '모든 것이 여기서 시작된다. 균형 잡힌 시작 기체.'],
-  ['B', 'STRIKER', '화력에 모든 것을 건 돌격 병기.'],
-  ['C', 'VORTEX', '선회전에서 잡히지 않는 궤적.'],
-  ['D', 'TITAN-X', '맞으면서 전진하는 하늘의 요새.'],
-  ['E', 'PHANTOM', '레이더에 잡히지 않는 마지막 해금.'],
+  ['A', 'APEX-S', '시작 기체 · 균형형'],
+  ['B', 'STRIKER', '돌격기 · 화력 중심'],
+  ['C', 'VORTEX', '선회전 특화'],
+  ['D', 'TITAN-X', '높은 내구력'],
+  ['E', 'PHANTOM', '레이더 회피 · 마지막 해금'],
 ];
 const box = document.getElementById('calls');
 function pick(i) {

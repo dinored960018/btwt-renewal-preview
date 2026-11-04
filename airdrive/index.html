@@ -3,177 +3,183 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AIRDRIVE — 손으로 조종하는 전투기 로그라이트</title>
-<meta name="description" content="컨트롤러를 내려놓아라. 손동작으로 조종하는 전투기 비행 액션 로그라이트, AIRDRIVE. Steam 데모 출시." />
-<meta name="theme-color" content="#060b14" />
+<title>AIRDRIVE — 손동작으로 조종하는 전투기 로그라이트</title>
+<meta name="description" content="손동작으로 조종하는 전투기 비행 액션 로그라이트 AIRDRIVE. Steam 데모 공개 중." />
+<meta name="theme-color" content="#000000" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="AIRDRIVE — 손으로 조종하는 전투기 로그라이트" />
-<meta property="og:description" content="당신의 손이 조종간이다. 손동작으로 조종하는 전투기 로그라이트 AIRDRIVE." />
+<meta property="og:title" content="AIRDRIVE — 손동작으로 조종하는 전투기 로그라이트" />
+<meta property="og:description" content="손동작으로 조종하는 전투기 비행 액션 로그라이트. Steam 데모 공개 중." />
 <meta property="og:url" content="https://blacktokkiwhitetokki.com/airdrive/" />
-<meta property="og:image" content="https://blacktokkiwhitetokki.com/images/airdrive-flightdeck.png" />
+<meta property="og:image" content="https://blacktokkiwhitetokki.com/images/airdrive-steam-header.jpg" />
 <link rel="canonical" href="https://blacktokkiwhitetokki.com/airdrive/" />
 <link rel="icon" type="image/png" href="../favicon.png" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Michroma&family=IBM+Plex+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+<a class="skip" href="#top" data-en="Skip to content">본문으로 건너뛰기</a>
 
-<!-- ══ Avionics boot sequence ══ -->
-<div id="boot" aria-hidden="true">
-  <div class="boot-inner">
-    <p class="boot-line">AIRDRIVE AVIONICS OS v2.6.0</p>
-    <p class="boot-line">POSE LINK ........ <b>OK</b></p>
-    <p class="boot-line">WEAPON SYS ....... <b>OK</b></p>
-    <p class="boot-line">ENV RENDER ....... <b>OK</b></p>
-    <div class="boot-bar"><i id="boot-fill"></i></div>
-    <p class="boot-line boot-ready">ALL SYSTEMS NOMINAL — CLEARED FOR TAKEOFF</p>
-  </div>
-</div>
+<!-- 3D 비행 장면 -->
+<canvas id="gl" aria-hidden="true"></canvas>
 
-<!-- ══ WebGL flight layer ══ -->
-<canvas id="gl"></canvas>
-<div class="vignette" aria-hidden="true"></div>
-<div class="scanlines" aria-hidden="true"></div>
-
-<!-- ══ Lock-on bracket (tracks the jet in 3D) ══ -->
-<div id="lockon" aria-hidden="true">
-  <span class="lk tl"></span><span class="lk tr"></span><span class="lk bl"></span><span class="lk br"></span>
-  <span class="lk-label">TGT · APEX-S<br/><em id="lk-dist">1.24 NM</em></span>
-</div>
-
-<!-- ══ Persistent cockpit HUD ══ -->
-<div class="hud" aria-hidden="true">
-  <div class="hud-corner tl"></div>
-  <div class="hud-corner tr"></div>
-  <div class="hud-corner bl"></div>
-  <div class="hud-corner br"></div>
-  <div class="hud-readout hud-spd"><span class="hud-label">SPD</span><span class="hud-value" id="hud-spd">0248</span><span class="hud-unit">KT</span></div>
-  <div class="hud-readout hud-alt"><span class="hud-label">ALT</span><span class="hud-value" id="hud-alt">11200</span><span class="hud-unit">FT</span></div>
-  <div class="hud-phase"><span class="hud-label">PHASE</span> <span id="hud-phase">TAKEOFF</span></div>
-</div>
-
-<!-- ══ Crosshair cursor ══ -->
-<div id="cursor" aria-hidden="true"><i></i></div>
-
-<!-- ══ Nav ══ -->
 <header class="nav">
-  <a class="nav-logo" href="../" aria-label="검은토끼흰토끼 프로젝트로 돌아가기" title="BTWT 프로젝트로 돌아가기">AIR<span>DRIVE</span></a>
-  <nav class="nav-links">
-    <a href="#control" data-en="Control">조종</a>
+  <nav class="nav-links" aria-label="페이지 안">
+    <a href="#control" data-en="Controls">조작</a>
     <a href="#parts" data-en="Parts">파츠</a>
-    <a href="#skills" data-en="Skills">스킬</a>
-    <a href="#hangar" data-en="Hangar">격납고</a>
+    <a href="#skills" data-en="Passives">패시브</a>
+    <a href="#hangar" data-en="Jets">기체</a>
+    <a href="#video" data-en="Video">영상</a>
   </nav>
+  <a class="nav-logo" href="../games/" aria-label="검토흰토 GAMES로 이동">BTWT<small>GAMES</small></a>
   <div class="nav-right">
-    <button id="lang" class="nav-lang" type="button" aria-label="Switch language">EN</button>
-    <a class="nav-cta" href="https://store.steampowered.com/app/4711010/AirDrive_Demo/" target="_blank" rel="noopener" data-en="Play Demo">데모 플레이</a>
+    <button id="lang" class="nav-lang" type="button" aria-label="Switch to English">EN</button>
+    <a class="nav-cta" href="https://store.steampowered.com/app/4711010/AirDrive_Demo/" target="_blank" rel="noopener">Steam 데모</a>
   </div>
 </header>
 
 <main id="top">
 
-  <!-- ── 01 HERO ── -->
-  <section class="sec hero" data-phase="TAKEOFF">
-    <p class="eyebrow reveal">STEAM · PC · ROGUELITE FLIGHT ACTION</p>
-    <h1 class="hero-title">
-      <span class="reveal outline" data-en="PUT DOWN">컨트롤러를</span>
-      <span class="reveal fill" data-en="THE CONTROLLER">내려놓아라</span>
-    </h1>
-    <p class="hero-sub reveal" data-en="Your hands are the flight stick. Tilt them in front of the camera and the jet banks with you.&lt;br/&gt;A fighter-jet roguelite flown by bare hands — &lt;strong&gt;AIRDRIVE&lt;/strong&gt;.">당신의 손이 조종간이다. 카메라 앞에서 손을 기울이면 기체가 기울어진다.<br/>손동작 인식으로 조종하는 전투기 로그라이트, <strong>AIRDRIVE</strong>.</p>
-    <div class="hero-data reveal">
-      <span>CALLSIGN <b>PLAYER-1</b></span>
-      <span>INPUT <b>BARE HANDS</b></span>
-      <span>RWY <b>27L</b></span>
+  <section class="sec hero">
+    <div class="panel hero-panel">
+      <p class="lead" data-en="A fighter-jet roguelite flown by hand gestures">손동작으로 조종하는 전투기 로그라이트</p>
+      <dl class="spec hero-spec">
+        <div><dt data-en="Platform">플랫폼</dt><dd>Steam (PC)</dd></div>
+        <div><dt data-en="Genre">장르</dt><dd data-en="Roguelite flight action">로그라이트 비행 액션</dd></div>
+        <div><dt data-en="Input">조작</dt><dd data-en="Webcam hand gestures">웹캠 손동작</dd></div>
+        <div><dt data-en="Status">공개</dt><dd data-en="Demo available">데모 공개 중</dd></div>
+      </dl>
+      <div class="cta-row">
+        <a class="btn primary" href="https://store.steampowered.com/app/4711010/AirDrive_Demo/" target="_blank" rel="noopener">Steam 데모</a>
+        <a class="btn ghost" href="#video" data-en="Watch video">영상 보기</a>
+      </div>
     </div>
-    <div class="scroll-hint reveal"><span></span><i data-en="scroll to take off">스크롤하여 이륙</i></div>
+    <h1 class="hero-word"><span id="heroWord">AIRDRIVE</span></h1>
   </section>
 
-  <!-- ── 02 CONTROL ── -->
-  <section class="sec side left" id="control" data-phase="CLIMB">
-    <div class="panel" data-code="PH-02">
-      <p class="eyebrow reveal">POSE CONTROL — MEDIAPIPE</p>
-      <h2 class="reveal" data-en="BARE HANDS&lt;br/&gt;ON THE STICK">맨손이<br/>조종간이 된다</h2>
-      <p class="body reveal" data-en="One webcam is all it takes. Hand tilt becomes roll and pitch, a closed fist fires, your face steers the view. Kalman and One-Euro filters strip the tremor so only intent reaches the airframe.">웹캠 하나면 충분하다. 손의 기울기가 롤과 피치로, 주먹은 발사로, 얼굴의 움직임은 시선으로 이어진다. 칼만 필터와 One-Euro 필터가 떨림을 걸러내 손끝의 의도만 기체에 전달한다.</p>
-      <ul class="spec reveal">
-        <li><b>ROLL / PITCH</b><i data-en="palm tilt">손바닥 기울기</i></li>
-        <li><b>FIRE</b><i data-en="closed fist">주먹 쥐기</i></li>
-        <li><b>VIEW</b><i data-en="face tracking">얼굴 트래킹</i></li>
-        <li><b>LATENCY</b><i data-en="&lt; 1 frame smoothing">&lt; 1 프레임 스무딩</i></li>
+  <section class="sec side left" id="control">
+    <div class="panel">
+      <h2 class="reveal" data-en="Hand Controls">맨손 조작</h2>
+      <p class="body reveal" data-en="Required: one webcam. Filters remove hand tremor before input reaches the jet.">필요한 장비: 웹캠 1대. 떨림을 걸러 낸 손동작이 기체에 전달됩니다.</p>
+      <dl class="spec reveal">
+        <div><dt data-en="Roll · Pitch">롤 · 피치</dt><dd data-en="Palm tilt">손바닥 기울기</dd></div>
+        <div><dt data-en="Fire">발사</dt><dd data-en="Closed fist">주먹 쥐기</dd></div>
+        <div><dt data-en="View">시점</dt><dd data-en="Face tracking">얼굴 트래킹</dd></div>
+        <div><dt data-en="Filters">떨림 보정</dt><dd data-en="Kalman · One-Euro">칼만 필터 · One-Euro 필터</dd></div>
+        <div><dt data-en="Smoothing">보정 지연</dt><dd data-en="Under 1 frame">1프레임 미만</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec side right" id="parts">
+    <div class="panel">
+      <h2 class="reveal" data-en="Part Upgrades">파츠 강화</h2>
+      <p class="body reveal" data-en="Parts rebuild the jet on every run.">회차마다 파츠 조합이 달라집니다.</p>
+      <dl class="spec reveal">
+        <div><dt data-en="Buy">구매</dt><dd data-en="With gold at the forward base, between sorties">출격 사이 전진기지에서 골드로 구매</dd></div>
+        <div><dt data-en="Fuse">합성</dt><dd data-en="Two identical parts → one rarity up">같은 파츠 2개 → 한 등급 위</dd></div>
+        <div><dt data-en="Engine">엔진</dt><dd data-en="Speed · Turn · Boost">속도 · 선회 · 부스트</dd></div>
+        <div><dt data-en="Armor">장갑</dt><dd data-en="HP · Mitigation · Impact">체력 · 피해 감소 · 내충격</dd></div>
+        <div><dt data-en="Weapon">무장</dt><dd data-en="Missile · Gun · Tracking">미사일 · 기관포 · 추적</dd></div>
+        <div><dt data-en="Avionics">항전</dt><dd data-en="Radar · Lock-on">레이더 · 락온</dd></div>
+      </dl>
+      <ul class="rarity reveal" aria-label="파츠 등급">
+        <li class="common">COMMON</li>
+        <li class="rare">RARE</li>
+        <li class="epic">EPIC</li>
+        <li class="legendary">LEGENDARY</li>
       </ul>
     </div>
   </section>
 
-  <!-- ── 03 PARTS ── -->
-  <section class="sec side right" id="parts" data-phase="REARM">
-    <div class="panel" data-code="PH-03">
-      <p class="eyebrow reveal">ROGUELITE PROGRESSION</p>
-      <h2 class="reveal" data-en="EVERY CRASH&lt;br/&gt;MAKES YOU STRONGER">추락할 때마다<br/>강해진다</h2>
-      <p class="body reveal" data-en="Between sorties, land at the forward base. Buy parts with gold, fuse duplicates into the next rarity. Engine, armor, weapon, avionics — four lines that rebuild your jet into a different machine every run.">출격 사이, 전진기지에 착륙해 골드로 파츠를 사고 합성한다. 엔진·장갑·무장·항전 — 네 계열의 파츠가 기체를 매 회차 다른 병기로 바꾼다. 같은 파츠 둘을 녹이면 한 등급 위가 된다.</p>
-      <div class="rarity-row reveal">
-        <span class="chip common">COMMON</span>
-        <span class="chip rare">RARE</span>
-        <span class="chip epic">EPIC</span>
-        <span class="chip legendary">LEGENDARY</span>
-      </div>
-      <ul class="spec reveal">
-        <li><b>ENGINE</b><i data-en="speed · turn · boost">속도 · 선회 · 부스트</i></li>
-        <li><b>ARMOR</b><i data-en="hp · mitigation · impact">체력 · 피해감소 · 내충격</i></li>
-        <li><b>WEAPON</b><i data-en="missile · gun · tracking">미사일 · 기관포 · 추적</i></li>
-        <li><b>AVIONICS</b><i data-en="radar · lock-on">레이더 · 락온</i></li>
+  <section class="sec skills" id="skills">
+    <div class="panel wide">
+      <h2 class="reveal" data-en="Passive Skills">패시브 스킬</h2>
+      <p class="body reveal" data-en="Passives stack each run and combine with one another.">패시브는 회차마다 쌓이고 효과가 서로 이어집니다.</p>
+      <ul class="catalog reveal">
+        <li><b>연쇄 낙뢰</b><span>Arc Lightning</span></li>
+        <li><b>분열 미사일</b><span>Cluster Missile</span></li>
+        <li><b>최후 병기</b><span>Doomsday</span></li>
+        <li><b>빙결탄</b><span>Cryo</span></li>
+        <li><b>궤도 방패</b><span>Orbit Shield</span></li>
+        <li><b>도탄</b><span>Ricochet</span></li>
+        <li><b>중력탄</b><span>Gravity Missile</span></li>
+        <li><b>혈전 광폭</b><span>Blood Rage</span></li>
+        <li><b>전자 마비</b><span>EMP</span></li>
+        <li><b>소이탄</b><span>Incendiary</span></li>
+        <li><b>유도 기총</b><span>Homing Bullet</span></li>
+        <li><b>공중 기뢰</b><span>Air Mine</span></li>
+        <li><b>플라즈마</b><span>Plasma</span></li>
+        <li><b>잭팟</b><span>Jackpot</span></li>
+        <li><b>산탄</b><span>Scatter</span></li>
+        <li><b>반격</b><span>Counter Attack</span></li>
       </ul>
     </div>
   </section>
 
-  <!-- ── 04 SKILLS ── -->
-  <section class="sec skills" id="skills" data-phase="ENGAGE">
-    <p class="eyebrow center reveal">PASSIVE ARSENAL — STORM CELL</p>
-    <h2 class="center reveal" data-en="A DOZEN WAYS&lt;br/&gt;TO OWN THE SKY">하늘을 지배하는<br/>수십 가지 방법</h2>
-    <p class="body center reveal" data-en="Passives stack every run and feed on each other. Lightning arcs between enemies, missiles split mid-flight, downed jets detonate again.">회차마다 쌓이는 패시브가 서로 얽혀 폭주한다. 번개가 적 사이를 타고 흐르고, 미사일은 분열하며, 격추된 적이 다시 폭발한다.</p>
-    <div class="ticker reveal" aria-label="패시브 스킬 목록">
-      <div class="ticker-track" id="ticker-a">
-        <span>ARC LIGHTNING ⌁ 연쇄 낙뢰</span><span>CLUSTER MISSILE ✦ 분열 미사일</span><span>DOOMSDAY ☄ 최후 병기</span><span>CRYO ❄ 빙결탄</span><span>ORBIT SHIELD ◍ 궤도 방패</span><span>RICOCHET ↯ 도탄</span><span>GRAVITY MISSILE ◉ 중력탄</span><span>BLOOD RAGE ▲ 혈전 광폭</span>
+  <section class="sec hangar" id="hangar">
+    <h2 class="hangar-title reveal" data-en="5 Jets">기체 5종</h2>
+    <ol class="fleet">
+      <li class="reveal"><h3>APEX-S</h3><p data-en="Starter · Balanced">시작 기체 · 균형형</p></li>
+      <li class="reveal"><h3>STRIKER</h3><p data-en="Assault · Firepower">돌격기 · 화력 중심</p></li>
+      <li class="reveal"><h3>VORTEX</h3><p data-en="Turn fights">선회전 특화</p></li>
+      <li class="reveal"><h3>TITAN-X</h3><p data-en="High durability">높은 내구력</p></li>
+      <li class="reveal"><h3>PHANTOM</h3><p data-en="Radar evasion · Final unlock">레이더 회피 · 마지막 해금</p></li>
+    </ol>
+  </section>
+
+  <section class="sec launch" id="video">
+    <div class="panel wide">
+      <h2 class="reveal" data-en="In-Game Video">인게임 영상</h2>
+      <button class="video reveal" id="videoFacade" type="button" aria-label="에어드라이브 인게임 영상 재생">
+        <img src="https://i.ytimg.com/vi/A9EQE2kU318/maxresdefault.jpg" alt="" loading="lazy" />
+        <span data-en="Play">재생</span>
+      </button>
+      <div class="cta-row reveal">
+        <a class="btn primary" href="https://store.steampowered.com/app/4711010/AirDrive_Demo/" target="_blank" rel="noopener">Steam 데모</a>
+        <a class="btn ghost" href="../games/" data-en="All games">게임 목록</a>
       </div>
     </div>
-    <div class="ticker reverse reveal" aria-hidden="true">
-      <div class="ticker-track" id="ticker-b">
-        <span>EMP ⌁ 전자 마비</span><span>INCENDIARY ✹ 소이탄</span><span>HOMING BULLET ➤ 유도 기총</span><span>AIR MINE ✕ 공중 기뢰</span><span>PLASMA ◈ 플라즈마</span><span>JACKPOT ✪ 잭팟</span><span>SCATTER ⁂ 산탄</span><span>COUNTER ATTACK ⇄ 반격</span>
-      </div>
-    </div>
   </section>
-
-  <!-- ── 05 HANGAR ── -->
-  <section class="sec hangar" id="hangar" data-phase="HANGAR">
-    <p class="eyebrow center reveal">THE HANGAR</p>
-    <h2 class="center reveal" data-en="FIVE CALLSIGNS">다섯 개의 콜사인</h2>
-    <div class="fleet">
-      <article class="jet-card reveal"><span class="jet-idx">A</span><h3>APEX-S</h3><p data-en="Where everything begins. The balanced starter.">모든 것이 여기서 시작된다. 균형 잡힌 시작 기체.</p><div class="bar"><i style="--v:62%"></i></div></article>
-      <article class="jet-card reveal"><span class="jet-idx">B</span><h3>STRIKER</h3><p data-en="Everything traded for firepower.">화력에 모든 것을 건 돌격 병기.</p><div class="bar"><i style="--v:78%"></i></div></article>
-      <article class="jet-card reveal"><span class="jet-idx">C</span><h3>VORTEX</h3><p data-en="A trajectory no one can hold in a turn fight.">선회전에서 잡히지 않는 궤적.</p><div class="bar"><i style="--v:71%"></i></div></article>
-      <article class="jet-card reveal"><span class="jet-idx">D</span><h3>TITAN-X</h3><p data-en="A fortress that advances while taking hits.">맞으면서 전진하는 하늘의 요새.</p><div class="bar"><i style="--v:85%"></i></div></article>
-      <article class="jet-card reveal"><span class="jet-idx">E</span><h3>PHANTOM</h3><p data-en="The final unlock no radar can hold.">레이더에 잡히지 않는 마지막 해금.</p><div class="bar"><i style="--v:93%"></i></div></article>
-    </div>
-  </section>
-
-  <!-- ── 06 LAUNCH CTA ── -->
-  <section class="sec launch" id="launch" data-phase="LAUNCH">
-    <div class="radar reveal" aria-hidden="true"><canvas id="radar" width="220" height="220"></canvas></div>
-    <h2 class="center reveal" data-en="THE RUNWAY&lt;br/&gt;IS READY">활주로는<br/>준비됐다</h2>
-    <p class="body center reveal" data-en="Turn on the webcam and raise your hands. The tower is waiting for your callsign — the demo is live on Steam.">웹캠을 켜고, 손을 들어라. 관제탑이 당신의 콜사인을 기다린다 — 데모가 Steam에 떠 있다.</p>
-    <div class="cta-row reveal">
-      <a class="btn primary" href="https://store.steampowered.com/app/4711010/AirDrive_Demo/" target="_blank" rel="noopener" data-en="Play the Demo on Steam">Steam 데모 플레이</a>
-      <a class="btn ghost" href="#top" data-en="Take off again">다시 이륙</a>
-    </div>
-    <footer class="foot">
-      <a class="foot-home" href="../" data-en="← Back to BTWT projects">← BTWT 프로젝트로 돌아가기</a>
-      <span data-en="© 2026 Black Rabbit White Rabbit — AIRDRIVE">© 2026 검은토끼 흰토끼 — AIRDRIVE</span>
-      <span class="foot-mono">RWY 27L · WIND CALM · CAVOK</span>
-    </footer>
-  </section>
-
 </main>
 
+<footer class="foot">
+  <span>© 2026 검은토끼흰토끼</span>
+  <a href="#top" data-en="Back to top">맨 위로</a>
+</footer>
+
+<script>
+// 화면 전체 폭에 맞춰 AIRDRIVE 글자를 키운다
+(function () {
+  var word = document.getElementById('heroWord');
+  var box = word.parentElement;
+  var ruler = document.createElement('canvas').getContext('2d');
+  function fit() {
+    ruler.font = '900 200px Paperlogy';
+    var m = ruler.measureText(word.textContent);
+    var ink = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+    var size = 200 * box.clientWidth / ink;
+    var k = size / 200;
+    var asc = m.actualBoundingBoxAscent * k;
+    var fA = m.fontBoundingBoxAscent * k, fD = m.fontBoundingBoxDescent * k;
+    box.style.height = Math.ceil(asc + m.actualBoundingBoxDescent * k) + 'px';
+    word.style.fontSize = size + 'px';
+    word.style.transform = 'translate(' + (m.actualBoundingBoxLeft * k) + 'px,' + (asc - ((size - (fA + fD)) / 2 + fA)) + 'px)';
+  }
+  fit();
+  if (document.fonts && document.fonts.load) document.fonts.load('900 200px Paperlogy').then(fit, fit);
+  addEventListener('resize', fit);
+})();
+// 영상은 누를 때만 불러온다
+document.getElementById('videoFacade').addEventListener('click', function () {
+  var f = document.createElement('iframe');
+  f.src = 'https://www.youtube-nocookie.com/embed/A9EQE2kU318?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+  f.title = '에어드라이브 인게임 영상';
+  f.allow = 'autoplay; encrypted-media; fullscreen';
+  f.allowFullscreen = true;
+  f.className = 'video-frame';
+  this.replaceWith(f);
+  f.focus();
+});
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script type="importmap">

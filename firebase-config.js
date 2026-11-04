@@ -46,7 +46,7 @@ export const SITE_CONFIG_DEFAULT = {
     {
       tag: "PC · ROGUELITE FLIGHT ACTION",
       title: "AIRDRIVE",
-      desc: "손을 기울여 전투기를 조종하는 맨손 비행 액션 로그라이트.",
+      desc: "웹캠 손동작으로 조종하는 비행 액션 로그라이트",
       link: "/airdrive/",
       thumbnail: "/images/airdrive-steam-header.jpg"
     },
