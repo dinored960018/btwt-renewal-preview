@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>지원하기 - 검은토끼흰토끼</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'ChungjuKimsaeng';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2312-1@1.1/ChungjuKimSaengTTF.woff2') format('woff2');
+      font-weight: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy-4Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy-7Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Paperlogy';
+      src: url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy-8ExtraBold.woff2') format('woff2');
+      font-weight: 800;
+      font-display: swap;
+    }
+    :root {
+      --color-primary-dark: #000000;
+      --color-primary-light: #ffffff;
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-muted: rgba(255, 255, 255, 0.4);
+      --text-faint: rgba(255, 255, 255, 0.25);
+      --surface-card: rgba(255, 255, 255, 0.04);
+      --border-default: rgba(255, 255, 255, 0.1);
+      --border-hover: rgba(255, 255, 255, 0.2);
+      --font-serif: 'Paperlogy', system-ui, -apple-system, sans-serif;
+      --font-sans: 'Paperlogy', system-ui, -apple-system, sans-serif;
+      --font-header: 'Nanum Myeongjo', Georgia, serif;
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-2xl: 3rem;
+      --space-3xl: 4rem;
+      --radius-sm: 2px;
+      --radius-md: 4px;
+      --radius-lg: 8px;
+      --transition-fast: 200ms ease;
+      --transition-base: 300ms ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { overflow-x: hidden; scrollbar-width: none; }
+    html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-primary-dark);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── 헤더 ── */
+    .header {
+      width: 100%;
+      background: var(--color-primary-light);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: var(--space-lg) var(--space-2xl);
+    }
+
+    .header h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-family: 'Noto Serif KR', 'Nanum Myeongjo', Georgia, serif;
+      font-weight: 900;
+      color: var(--color-primary-dark);
+      letter-spacing: 0.12em;
+      line-height: 1.1;
+      min-height: calc(clamp(3rem, 8vw, 6rem) * 1.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .header h1.lang-ko {
+      font-family: 'ChungjuKimsaeng', 'Batang', '바탕', 'Noto Serif KR', serif;
+      font-weight: 400;
+    }
+    .header h1.lang-en {
+      font-family: 'Baskerville', 'Libre Baskerville', 'Noto Serif KR', serif;
+      font-weight: 700;
+    }
+
+    .header h1 a { color: inherit; }
+
+    /* ── 페이지 콘텐츠 ── */
+    .page-content {
+      flex: 1;
+      padding: var(--space-3xl) var(--space-2xl);
+      max-width: 640px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .page-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: var(--space-md);
+    }
+
+    .page-title {
+      color: var(--text-primary);
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+      letter-spacing: -0.02em;
+    }
+
+    .position-name {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      margin-bottom: var(--space-2xl);
+    }
+
+    .back-link {
+      display: inline-block;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: var(--space-xl);
+      transition: color var(--transition-base);
+    }
+
+    .back-link:hover { color: var(--text-primary); }
+
+    /* ── 폼 ── */
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+
+    .form-group label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .form-group label .required {
+      color: var(--text-muted);
+      font-size: 0.6875rem;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: var(--space-xs);
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="url"],
+    .form-group textarea {
+      width: 100%;
+      padding: var(--space-sm) var(--space-md);
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      transition: border-color var(--transition-base);
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--text-secondary);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-faint);
+    }
+
+    .form-group textarea {
+      min-height: 160px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    .form-group input[type="file"] {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .form-group input[type="file"]::file-selector-button {
+      padding: var(--space-xs) var(--space-md);
+      background: transparent;
+      border: 1px solid var(--border-hover);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-right: var(--space-md);
+      transition: background var(--transition-base), color var(--transition-base);
+    }
+
+    .form-group input[type="file"]::file-selector-button:hover {
+      background: var(--surface-card);
+      color: var(--text-primary);
+    }
+
+    .btn-submit {
+      display: inline-block;
+      padding: var(--space-sm) var(--space-2xl);
+      border: 1px solid var(--text-primary);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      transition: background var(--transition-base), color var(--transition-base);
+      cursor: pointer;
+      background: transparent;
+      margin-top: var(--space-md);
+    }
+
+    .btn-submit:hover {
+      background: var(--text-primary);
+      color: var(--color-primary-dark);
+    }
+
+    /* ── 푸터 ── */
+    .footer {
+      border-top: 1px solid var(--border-default);
+      padding: var(--space-2xl);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-lg);
+    }
+
+    .footer-logo {
+      font-family: var(--font-header);
+      font-weight: 800;
+      font-size: clamp(3rem, 8vw, 6rem);
+      color: var(--text-primary);
+      letter-spacing: 0.05em;
+      line-height: 1.1;
+    }
+
+    .footer-copyright {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    /* ── 반응형 ── */
+    @media (max-width: 768px) {
+      .header { padding: var(--space-md) var(--space-lg); }
+      .page-content { padding: var(--space-2xl) var(--space-lg); }
+      .footer { padding: var(--space-2xl) var(--space-lg); }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <h1 class="brand-name"><a href="index.html">黑兔白兔</a></h1>
+    <script>(function(){var n=['검토흰토','黑兔白兔','BTWT'],L=['ko','zh','en'],i=Math.floor(Math.random()*3);document.querySelectorAll('.brand-name').forEach(function(e){e.classList.add('lang-'+L[i]);var a=e.querySelector('a');(a||e).textContent=n[i];});})();</script>
+  </header>
+
+  <main class="page-content">
+    <a href="careers.html" class="back-link">&larr; 채용 목록으로 돌아가기</a>
+    <p class="page-label">Apply</p>
+    <h2 class="page-title">지원서 작성</h2>
+    <p class="position-name" id="positionDisplay"></p>
+
+    <form id="applyForm" onsubmit="return handleSubmit(event)">
+      <div class="form-group">
+        <label>이름 <span class="required">필수</span></label>
+        <input type="text" name="name" placeholder="홍길동" required>
+      </div>
+
+      <div class="form-group">
+        <label>이메일 <span class="required">필수</span></label>
+        <input type="email" name="email" placeholder="example@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>연락처 <span class="required">필수</span></label>
+        <input type="tel" name="phone" placeholder="010-0000-0000" required>
+      </div>
+
+      <div class="form-group">
+        <label>포트폴리오 URL</label>
+        <input type="url" name="portfolio" placeholder="https://your-portfolio.com">
+      </div>
+
+      <div class="form-group">
+        <label>자기소개 <span class="required">필수</span></label>
+        <textarea name="intro" placeholder="지원 동기와 본인을 소개해주세요." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>파일 첨부</label>
+        <input type="file" name="attachment" accept=".pdf,.doc,.docx,.zip,.png,.jpg">
+      </div>
+
+      <button type="submit" class="btn-submit">제출하기</button>
+    </form>
+  </main>
+
+  <footer class="footer">
+    <span class="footer-logo">검은토끼흰토끼</span>
+    <p class="footer-copyright">&copy; 2026 검은토끼흰토끼. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // URL 파라미터에서 직군명 읽기
+    const params = new URLSearchParams(window.location.search);
+    const position = params.get('position');
+    const display = document.getElementById('positionDisplay');
+    if (position) {
+      display.textContent = '지원 직군: ' + decodeURIComponent(position);
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const name = e.target.name.value;
+      alert(name + '님, 지원서가 성공적으로 제출되었습니다.\n검토 후 연락드리겠습니다. 감사합니다!');
+      return false;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>검토흰토 GAMES — 게임 아카이브</title>
+<meta name="description" content="검은토끼흰토끼가 만든 게임 아카이브. 대표작 AIRDRIVE, 손으로 조종하는 전투기 로그라이트.">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500&text=%E9%BB%91%E5%85%94%E7%99%BD&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+/* 대표작: 영상 + 구매칸 자리의 행동 띠 */
+.hero{position:relative;display:grid;grid-template-columns:auto 1fr;height:calc(100dvh - 124px);min-height:520px;border-bottom:1px solid var(--line)}
+.hero-label{writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;width:clamp(48px,5.5vw,84px);font-weight:400;font-size:clamp(28px,3.4vw,50px);line-height:1;white-space:nowrap;overflow:hidden}
+.hero-stage{min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.hero-video{position:relative;flex:1;min-height:0;overflow:hidden;background:#000 url('https://i.ytimg.com/vi/A9EQE2kU318/maxresdefault.jpg') center/cover}
+/* 영상 위아래를 잘라 플레이어 표시를 숨긴다 */
+.hero-video iframe{position:absolute;left:50%;top:50%;width:max(128%,calc(128cqh * 16 / 9));aspect-ratio:16/9;transform:translate(-50%,-50%);border:0;pointer-events:none}
+.hero-video{container-type:size}
+.hero-click{position:absolute;inset:0;z-index:1;display:block}
+.buy{display:grid;background:#000;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:20px 40px;padding:clamp(16px,2vw,28px);border-top:1px solid var(--line)}
+.buy h1{font-weight:500;font-size:clamp(48px,6.6vw,100px);line-height:1}
+.buy p{margin-top:14px;font-size:clamp(15px,1.25vw,18px);max-width:44ch}
+.buy .tag{display:block;font-size:13px;font-weight:400;margin-top:10px;color:var(--dim)}
+.buy-act{display:flex;gap:10px}
+
+/* 진열대 */
+.shelf{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--fg);border-left:1px solid var(--line)}
+.item{position:relative;display:flex;flex-direction:column;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+.item-thumb{position:relative;aspect-ratio:1/1;overflow:hidden;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line)}
+.item-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+a.item:hover .item-thumb img{transform:scale(1.05)}
+.item.soon .item-thumb img{width:62%;height:auto;object-fit:contain;opacity:.32;transform:none}
+.item-body{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;padding:14px 16px 18px;flex:1;align-content:start}
+.item h3{font-weight:500;font-size:clamp(20px,1.7vw,24px);line-height:1.2}
+.item .state{align-self:start;font-size:12px;font-weight:400;padding:2px 7px;border:1px solid currentColor;white-space:nowrap}
+a.item .state{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.item .type{grid-column:1/-1;font-size:12px;font-weight:400;color:var(--dim);margin-top:4px}
+.item .desc{grid-column:1/-1;font-size:14px;line-height:1.55;margin-top:8px;color:var(--dim)}
+
+/* 룩북: 기체를 상품처럼 돌려 본다 */
+.look{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);border-top:1px solid var(--fg)}
+.look-stage{position:relative;aspect-ratio:5/4;min-height:420px;border-right:1px solid var(--line);overflow:hidden;background:#000}
+.look-stage model-viewer{width:100%;height:100%;filter:grayscale(1) contrast(1.5);--poster-color:transparent;background:#000}
+.look-name{position:absolute;left:clamp(14px,2vw,24px);bottom:clamp(14px,2vw,24px);pointer-events:none;font-weight:500;font-size:clamp(44px,6.4vw,96px);line-height:1;mix-blend-mode:difference;color:#fff}
+.look-note{position:absolute;right:14px;top:12px;font-size:12px;font-weight:500;color:var(--dim)}
+.look-side{display:flex;flex-direction:column}
+.callsigns{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--line)}
+.callsigns button{min-height:60px;background:none;border:0;border-right:1px solid var(--line);font-weight:500;font-size:clamp(17px,1.5vw,21px);cursor:pointer;transition:background .18s,color .18s}
+.callsigns button:last-child{border-right:0}
+.callsigns button:hover{background:rgba(255,255,255,.14)}
+.callsigns button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+.look-copy{padding:clamp(18px,2.4vw,32px);border-bottom:1px solid var(--line)}
+.look-copy strong{display:block;font-size:clamp(19px,1.6vw,23px);font-weight:500;line-height:1.4}
+.look-copy p{margin-top:8px;color:var(--dim)}
+.spec{width:100%;border-collapse:collapse;font-size:15px}
+.spec th,.spec td{text-align:left;padding:13px clamp(18px,2.4vw,32px);border-bottom:1px solid var(--line);font-weight:400;vertical-align:top}
+.spec th{width:38%;font-weight:500}
+.look-side .btn{margin:clamp(18px,2.4vw,32px);margin-top:auto}
+.look-side .spec{margin-bottom:clamp(18px,2.4vw,32px)}
+
+/* 채용: 목록형 진열 */
+.jobs{list-style:none;border-top:1px solid var(--fg)}
+.jobs a{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:28px;align-items:baseline;padding:18px 4px;border-bottom:1px solid var(--line);transition:padding .35s var(--ease),background .18s,color .18s}
+.jobs a:hover{background:var(--fg);color:var(--bg);padding-inline:18px}
+.jobs b{font-weight:500;font-size:clamp(21px,2.3vw,32px);line-height:1.2}
+.jobs span{font-size:14px;font-weight:400}
+
+@media (max-width:980px){
+  .shelf{grid-template-columns:repeat(2,1fr)}
+  .look{grid-template-columns:1fr}
+  .look-stage{border-right:0;border-bottom:1px solid var(--line);min-height:0}
+}
+@media (max-width:720px){
+  .hero{grid-template-columns:1fr;height:auto;min-height:0}
+  .hero-label{display:none}
+  .hero-video{flex:none;aspect-ratio:16/9}
+  .buy{grid-template-columns:1fr;border-top:0}
+  .buy h1{font-size:15.5vw}
+  .buy-act{flex-direction:column}
+  .jobs a{grid-template-columns:1fr auto;gap:2px 14px}
+  .jobs a span:last-child{display:none}
+}
+</style>
+</head>
+<body class="ink">
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<p class="strip"><span>AIRDRIVE 데모 공개 중</span><a href="https://store.steampowered.com/app/4711010/AirDrive_Demo/" target="_blank" rel="noopener">Steam에서 보기</a></p>
+<header class="top">
+  <nav aria-label="사업"><a href="../games/" aria-current="page">GAMES</a><a href="../studio/">STUDIO</a></nav>
+  <a class="mark" href="../" aria-label="검은토끼흰토끼 처음으로"><span data-brand>黑兔白兔</span><small>GAMES</small></a>
+  <nav aria-label="페이지 안"><a href="#archive">ARCHIVE</a><a href="#airdrive">AIRDRIVE</a><a href="#careers">CAREERS</a></nav>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="featured-title">
+    <div class="hero-label" aria-hidden="true">PROJECT</div>
+    <div class="hero-stage" id="stage">
+      <div class="hero-video" id="video"><a class="hero-click" id="heroClick" href="../airdrive/" aria-label="AIRDRIVE 소개 페이지 열기"></a></div>
+      <div class="buy">
+        <div>
+          <h1 id="featured-title">AIRDRIVE</h1>
+          <span class="tag">PC · ROGUELITE FLIGHT ACTION</span>
+          <p>손을 기울여 전투기를 조종하는 맨손 비행 액션 로그라이트.</p>
+        </div>
+        <div class="buy-act">
+          <a class="btn" href="https://store.steampowered.com/app/4711010/AirDrive_Demo/" target="_blank" rel="noopener">Steam 데모 플레이 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 13L13 3M5 3h8v8"/></svg></a>
+          <a class="btn line" href="../airdrive/">게임 자세히</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="archive" aria-labelledby="archive-title">
+    <h2 class="sec-h" id="archive-title">Archive</h2>
+    <div class="shelf" id="shelf"></div>
+  </section>
+
+  <section class="sec" id="airdrive" aria-labelledby="look-title">
+    <h2 class="sec-h" id="look-title">The Hangar</h2>
+    <div class="look">
+      <div class="look-stage">
+        <model-viewer id="jet" alt="AIRDRIVE 전투기 3D 모델. 끌어서 돌려 볼 수 있습니다." loading="lazy" reveal="auto" camera-controls disable-zoom auto-rotate auto-rotate-delay="0" rotation-per-second="14deg" interaction-prompt="none" shadow-intensity="0" exposure=".6" camera-orbit="35deg 72deg 105%"></model-viewer>
+        <span class="look-note">끌어서 돌려 보기</span>
+        <span class="look-name" id="lookName" aria-live="polite">APEX-S</span>
+      </div>
+      <div class="look-side">
+        <div class="callsigns" role="group" aria-label="콜사인 선택" id="calls"></div>
+        <div class="look-copy"><strong id="callLine"></strong><p>회차마다 파츠와 패시브가 쌓여 기체가 다른 병기로 바뀝니다.</p></div>
+        <table class="spec">
+          <caption class="sr">AIRDRIVE 조작과 파츠</caption>
+          <tbody>
+            <tr><th scope="row">ROLL / PITCH</th><td>손바닥 기울기</td></tr>
+            <tr><th scope="row">FIRE</th><td>주먹 쥐기</td></tr>
+            <tr><th scope="row">VIEW</th><td>얼굴 트래킹</td></tr>
+            <tr><th scope="row">PARTS</th><td>엔진 · 장갑 · 무장 · 항전</td></tr>
+          </tbody>
+        </table>
+        <a class="btn line" href="../airdrive/">격납고 더 보기 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="careers" aria-labelledby="careers-title">
+    <h2 class="sec-h ko" id="careers-title">좋은 게임은 좋은 사람들로부터 시작됩니다.</h2>
+    <ul class="jobs">
+      <li><a href="../apply.html?position=Game%20Client%20Engineer"><b>Game Client Engineer</b><span>Engineering</span><span>정규직</span></a></li>
+      <li><a href="../apply.html?position=2D%20Pixel%20Artist"><b>2D Pixel Artist</b><span>Art</span><span>정규직</span></a></li>
+      <li><a href="../apply.html?position=UI/UX%20Designer"><b>UI/UX Designer</b><span>Design</span><span>정규직</span></a></li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div class="foot-art" role="img" aria-label="BLACKTOKKI WHITETOKKI">
+    <div class="k"><img src="../images/rabbit-white.png" alt="" loading="lazy"><span>BLACKTOKKI</span></div>
+    <div class="w"><img src="../images/rabbit-black.png" alt="" loading="lazy"><span>WHITETOKKI</span></div>
+  </div>
+  <div class="foot-links">
+    <ul>
+      <li><a href="../studio/">STUDIO</a></li>
+      <li><a href="../careers.html">채용 안내</a></li>
+      <li><a href="../support.html">고객센터</a></li>
+      <li><a href="../privacy.html">개인정보처리방침</a></li>
+      <li><a href="../terms.html">이용약관</a></li>
+    </ul>
+    <div class="social">
+      <a data-social="discord" target="_blank" rel="noopener" aria-label="Discord" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 4.4a19.8 19.8 0 0 0-4.9-1.5l-.6 1.3a18.3 18.3 0 0 0-5.5 0l-.6-1.3a19.7 19.7 0 0 0-4.9 1.5C.5 9-.3 13.6.1 18.1a19.9 19.9 0 0 0 6 3l1.3-2a13 13 0 0 1-1.9-.9l.4-.3c3.9 1.8 8.2 1.8 12 0l.4.3c-.6.4-1.2.7-1.9.9l1.3 2a19.8 19.8 0 0 0 6-3c.5-5.2-.8-9.7-3.4-13.7zM8 15.3c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4zm8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4z"/></svg></a>
+      <a data-social="instagram" target="_blank" rel="noopener" aria-label="Instagram" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></a>
+      <a data-social="youtube" target="_blank" rel="noopener" aria-label="YouTube" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.2C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.2c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.2c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
+    </div>
+  </div>
+  <p class="copy">© 2026 검은토끼흰토끼. All rights reserved.</p>
+</footer>
+
+<script type="module">
+import { applyBrandName, applySocial, subscribeConfig, siteUrl } from '../assets/site.js';
+import { SITE_CONFIG_DEFAULT } from '../firebase-config.js';
+applyBrandName();
+
+// 대표 영상: 움직임 줄이기 설정이면 포스터만 둔다
+const video = document.getElementById('video');
+const youtubeId = SITE_CONFIG_DEFAULT.video.youtubeId;
+if (!matchMedia('(prefers-reduced-motion:reduce)').matches) {
+  const f = document.createElement('iframe');
+  f.src = `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&playlist=${youtubeId}&controls=0&rel=0&modestbranding=1&playsinline=1`;
+  f.title = '에어드라이브 인게임 영상';
+  f.allow = 'autoplay; encrypted-media';
+  f.tabIndex = -1;
+  video.append(f);
+}
+
+// 진열대: 관리자 페이지의 게임 카드 4칸을 그대로 쓴다. 링크가 없는 칸은 준비 중.
+const shelf = document.getElementById('shelf');
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function renderShelf(list) {
+  const slots = SITE_CONFIG_DEFAULT.subProjects.map((fallback, i) => {
+    const got = Array.isArray(list) ? list[i] : null;
+    const blank = !got || (!got.link && (!got.title || got.title.trim().toLowerCase() === 'untitled'));
+    return blank ? fallback : { ...fallback, ...got };
+  });
+  shelf.innerHTML = slots.map(s => {
+    if (!s.link) return `<div class="item soon">
+      <div class="item-thumb"><img src="../images/rabbit-white.png" alt="" loading="lazy"></div>
+      <div class="item-body"><h3>Next</h3><span class="state">준비 중</span><span class="type">다음 게임을 만들고 있습니다</span></div></div>`;
+    const ext = /^https?:/.test(s.link);
+    return `<a class="item" href="${esc(siteUrl(s.link))}"${ext ? ' target="_blank" rel="noopener"' : ''}>
+      <div class="item-thumb">${s.thumbnail ? `<img src="${esc(siteUrl(s.thumbnail))}" alt="" loading="lazy">` : ''}</div>
+      <div class="item-body"><h3>${esc(s.title)}</h3><span class="state">공개 중</span><span class="type">${esc(s.tag)}</span><p class="desc">${esc(s.desc)}</p></div></a>`;
+  }).join('');
+}
+
+subscribeConfig(cfg => {
+  applySocial(cfg.social);
+  renderShelf(cfg.subProjects);
+  const click = document.getElementById('heroClick');
+  const url = cfg.video?.clickUrl;
+  if (url) { click.href = url; click.target = '_blank'; click.rel = 'noopener'; }
+});
+
+// 콜사인 선택: 상품 옵션처럼 고른다
+const calls = [
+  ['A', 'APEX-S', '모든 것이 여기서 시작된다. 균형 잡힌 시작 기체.'],
+  ['B', 'STRIKER', '화력에 모든 것을 건 돌격 병기.'],
+  ['C', 'VORTEX', '선회전에서 잡히지 않는 궤적.'],
+  ['D', 'TITAN-X', '맞으면서 전진하는 하늘의 요새.'],
+  ['E', 'PHANTOM', '레이더에 잡히지 않는 마지막 해금.'],
+];
+const box = document.getElementById('calls');
+function pick(i) {
+  [...box.children].forEach((b, n) => b.setAttribute('aria-pressed', n === i));
+  document.getElementById('lookName').textContent = calls[i][1];
+  document.getElementById('callLine').textContent = calls[i][2];
+  // 콜사인마다 기체를 다른 각도에서 보여 준다
+  document.getElementById('jet').cameraOrbit = ['35deg 72deg 105%', '140deg 60deg 105%', '250deg 80deg 105%', '320deg 50deg 105%', '90deg 88deg 105%'][i];
+}
+calls.forEach(([letter, name], i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = letter; b.setAttribute('aria-label', name);
+  b.addEventListener('click', () => pick(i));
+  box.append(b);
+});
+pick(0);
+
+// 3D 모델은 화면 가까이 왔을 때만 불러온다
+const jet = document.getElementById('jet');
+new IntersectionObserver((es, o) => {
+  if (!es[0].isIntersecting) return;
+  o.disconnect();
+  const s = document.createElement('script');
+  s.type = 'module';
+  s.src = 'https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js';
+  document.head.append(s);
+  jet.setAttribute('src', '../images/airdrive-jet.glb');
+}, { rootMargin: '400px' }).observe(jet);
+</script>
+</body>
+</html>
