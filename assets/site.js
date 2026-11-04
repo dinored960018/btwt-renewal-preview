@@ -53,3 +53,31 @@ export async function subscribeConfig(onData) {
     console.warn('[btwt] Firebase 연결 실패, 기본값을 씁니다.', err);
   }
 }
+
+// 하단 BLACKTOKKI / WHITETOKKI: 글자 잉크를 재서 칸의 좌우와 아래에 여백 없이 붙인다
+function fitFootWords() {
+  const row = document.querySelector('.foot-art');
+  if (!row) return;
+  const ruler = document.createElement('canvas').getContext('2d');
+  ruler.font = '900 200px Paperlogy';
+  const items = [...row.querySelectorAll('span')].map(cell => {
+    const el = cell.querySelector('i');
+    const m = ruler.measureText(el.textContent);
+    return { cell, el, m, ink: m.actualBoundingBoxLeft + m.actualBoundingBoxRight };
+  });
+  const size = Math.min(...items.map(i => 200 * i.cell.clientWidth / i.ink));
+  const k = size / 200;
+  const asc = Math.max(...items.map(i => i.m.actualBoundingBoxAscent)) * k;
+  const desc = Math.max(...items.map(i => i.m.actualBoundingBoxDescent)) * k;
+  row.style.setProperty('--fw', Math.ceil(asc + desc) + 'px');
+  items.forEach(({ cell, el, m, ink }) => {
+    const sx = cell.clientWidth / (ink * k);
+    const fA = m.fontBoundingBoxAscent * k, fD = m.fontBoundingBoxDescent * k;
+    el.style.fontSize = size + 'px';
+    el.style.transform = `translate(${m.actualBoundingBoxLeft * k * sx}px,${asc - ((size - (fA + fD)) / 2 + fA)}px) scaleX(${sx})`;
+  });
+}
+if (document.querySelector('.foot-art')) {
+  document.fonts?.load('900 200px Paperlogy').then(fitFootWords, fitFootWords);
+  addEventListener('resize', fitFootWords);
+}
