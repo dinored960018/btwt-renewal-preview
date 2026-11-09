@@ -34,87 +34,6 @@ const ICON = {
   move: '<svg viewBox="0 0 24 24" width="24" height="24" style="translate:-11px -11px"><path d="M12 1l4 4h-3v6h6V8l4 4-4 4v-3h-6v6h3l-4 4-4-4h3v-6H5v3l-4-4 4-4v3h6V5H8z" fill="#fff"/></svg>',
 };
 
-// ── 소리 ─────────────────────────────
-// 타자는 기계식 키보드 같은 짧은 딸깍 + 낮은 퉁, 칸이 놓이면 E장조 5음 음계의 유리 피아노 음을 8분음표 박자에 맞춰 낸다.
-// 큰 칸은 낮게, 작은 칸은 높게, 왼쪽에서 오른쪽으로 갈수록 높아지고 커서 위치로 좌우가 나뉜다.
-class Sfx {
-  constructor() {
-    this.on = true;
-    try { if (sessionStorage.getItem('btwt-sound') === 'off') this.on = false; } catch (e) {}
-    this.ctx = null;
-  }
-  get ready() { return this.on && this.ctx && this.ctx.state === 'running'; }
-  init() {
-    if (this.ctx) return;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    this.ctx = new AC();
-    this.out = this.ctx.createGain(); this.out.gain.value = .55;
-    const comp = this.ctx.createDynamicsCompressor();
-    this.out.connect(comp).connect(this.ctx.destination);
-    const n = this.ctx.sampleRate * .05, buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-    this.noise = buf;
-  }
-  resume() { this.init(); return this.ctx?.resume(); }
-  pan(x, w) { const p = this.ctx.createStereoPanner(); p.pan.value = clamp((x / w) * 2 - 1, -1, 1) * .6; p.connect(this.out); return p; }
-  tick(x, w, f, len, vol) {
-    const c = this.ctx, t = c.currentTime, s = c.createBufferSource(), hp = c.createBiquadFilter(), g = c.createGain();
-    s.buffer = this.noise; hp.type = 'highpass'; hp.frequency.value = f;
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + len);
-    s.connect(hp).connect(g).connect(this.pan(x, w)); s.start(t); s.stop(t + len + .01);
-  }
-  thock(x, w, f0, f1, vol) {
-    const c = this.ctx, t = c.currentTime, o = c.createOscillator(), g = c.createGain();
-    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + .04);
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + .05);
-    o.connect(g).connect(this.pan(x, w)); o.start(t); o.stop(t + .06);
-  }
-  key(x, w, space) { if (!this.ready) return; this.tick(x, w, 2400 + rand(-300, 300), .025, .09); this.thock(x, w, space ? 110 : 170, space ? 60 : 90, space ? .1 : .06); }
-  press(x, w) { if (!this.ready) return; this.tick(x, w, 3000, .02, .07); setTimeout(() => this.ready && this.tick(x, w, 3600, .015, .05), 70); }
-  snap(x, w) { if (!this.ready) return; this.tick(x, w, 5000, .015, .12); }
-  grow(k, x, w) { if (!this.ready) return; this.note(600 * Math.pow(2, k / 12), x, w, .03, .12, false); }
-  note(f, x, w, vol = .05, len = 1.6, grid = true) {
-    const c = this.ctx;
-    const step = 60 / 112 / 2;
-    const t = grid ? Math.ceil((c.currentTime + .01) / step) * step : c.currentTime;
-    const g = c.createGain(), lp = c.createBiquadFilter();
-    lp.type = 'lowpass'; lp.frequency.value = 4200;
-    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .006); g.gain.exponentialRampToValueAtTime(.0001, t + len);
-    g.connect(lp).connect(this.pan(x, w));
-    for (const [m, v] of [[1, 1], [2.003, .35], [3.01, .12]]) {
-      const o = c.createOscillator(), og = c.createGain();
-      o.type = 'sine'; o.frequency.value = f * m; og.gain.value = v;
-      o.connect(og).connect(g); o.start(t); o.stop(t + len + .05);
-    }
-  }
-  // 칸이 놓였을 때: 큰 칸 낮게, 작은 칸 높게, 왼쪽→오른쪽 높아짐. 드문드문만 울린다
-  place(r, W, H, kind) {
-    if (!this.ready || Math.random() > (kind === 'text' ? .35 : .6)) return;
-    const PENTA = [0, 2, 4, 7, 9];
-    const area = clamp((r.w * r.h) / (W * H), 0, 1);
-    const oct = area > .25 ? 0 : area > .05 ? 1 : 2;
-    const i = Math.floor(clamp((r.x + r.w / 2) / W, 0, .999) * PENTA.length);
-    this.note(164.81 * Math.pow(2, oct + PENTA[i] / 12), r.x + r.w / 2, W, kind === 'dup' ? .04 : .05);
-  }
-  swell(w) {
-    if (!this.ready) return;
-    const c = this.ctx, t = c.currentTime, s = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain();
-    s.buffer = this.noise; s.loop = true; bp.type = 'bandpass'; bp.Q.value = 1.2;
-    bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(1600, t + 1.2);
-    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.05, t + .5); g.gain.exponentialRampToValueAtTime(.0001, t + 1.4);
-    s.connect(bp).connect(g).connect(this.pan(w / 2, w)); s.start(t); s.stop(t + 1.5);
-  }
-  arp(w) { if (!this.ready) return; [0, 4, 7, 12, 16].forEach((s, i) => setTimeout(() => this.ready && this.note(329.63 * Math.pow(2, s / 12), w * (.2 + i * .15), w, .04, 1, false), i * 70)); }
-  chord(w) { if (!this.ready) return; [164.81, 246.94, 329.63, 415.3].forEach((f, i) => this.note(f, w * (.3 + i * .13), w, .045, 3, false)); }
-  fall(w) {
-    if (!this.ready) return;
-    const c = this.ctx, t = c.currentTime, o = c.createOscillator(), g = c.createGain();
-    o.frequency.setValueAtTime(900, t); o.frequency.exponentialRampToValueAtTime(180, t + .6);
-    g.gain.setValueAtTime(.04, t); g.gain.exponentialRampToValueAtTime(.0001, t + .65);
-    o.connect(g).connect(this.pan(w / 2, w)); o.start(t); o.stop(t + .7);
-  }
-}
 
 export const introWanted = () => root.classList.contains('intro-on');
 
@@ -123,7 +42,6 @@ export async function runIntro({ key, steps }) {
   if (!ov || !introWanted()) return;
   let done = false, raf = 0;
   const base = getComputedStyle(document.body).backgroundColor;
-  const sfx = new Sfx();
   let speedMul = 1, tourOn = true;
 
   function finish(fast) {
@@ -276,26 +194,14 @@ export async function runIntro({ key, steps }) {
   hud.innerHTML = `<span class="st"></span>
     <span class="grp">${[1, 2, 3].map(v => `<button type="button" data-sp="${v}" aria-pressed="${v === 1}">${v}×</button>`).join('')}</span>
     <button type="button" data-a="tour" aria-pressed="true">자동 스크롤</button>
-    <button type="button" data-a="snd"></button>`;
+    <button type="button" data-a="end">끝내기</button>`;
   const st = hud.querySelector('.st');
-  const sndBtn = hud.querySelector('[data-a="snd"]');
-  const renderSnd = () => { sndBtn.textContent = !sfx.on ? '소리 꺼짐' : sfx.ready ? '소리 켜짐' : '소리 켜기'; sndBtn.setAttribute('aria-pressed', String(sfx.ready)); };
   hud.addEventListener('click', async e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.sp) { speedMul = +b.dataset.sp; hud.querySelectorAll('[data-sp]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); }
+    else if (b.dataset.a === 'end') finish(true);
     else if (b.dataset.a === 'tour') { tourOn = !tourOn; b.setAttribute('aria-pressed', String(tourOn)); }
-    else if (b.dataset.a === 'snd') {
-      if (sfx.ready) sfx.on = false; else { sfx.on = true; await sfx.resume(); }
-      try { sessionStorage.setItem('btwt-sound', sfx.on ? 'on' : 'off'); } catch (er) {}
-      renderSnd();
-    }
   });
-  // 브라우저는 처음 한 번 누르기 전까지 소리를 막는다. 아무 데나 한 번 누르면 켠다
-  sfx.init();
-  if (sfx.on) sfx.ctx?.resume().then(renderSnd, () => {});
-  ov.addEventListener('pointerdown', e => { if (sfx.on && !e.target.closest('[data-a="snd"]')) sfx.resume()?.then(renderSnd); });
-  addEventListener('keydown', () => { if (sfx.on) sfx.resume()?.then(renderSnd); }, { once: true });
-  renderSnd();
   let mouse = null;
   addEventListener('pointermove', e => { mouse = { x: e.clientX, y: e.clientY }; }, { passive: true });
 
@@ -324,7 +230,7 @@ export async function runIntro({ key, steps }) {
   logo.style.transform = `translate(${cx - 28}px,${cy - 28}px)`;
   if (fav) logo.innerHTML = `<img src="${fav}" alt="">`;
   logo.animate([{ opacity: 0, scale: .6 }, { opacity: 1, scale: 1 }], { duration: 400, easing: 'ease-out', fill: 'forwards' });
-  sfx.swell(W);
+ 
 
   const t0 = performance.now();
   let flock = false;
@@ -398,11 +304,11 @@ export async function runIntro({ key, steps }) {
   }
   const wait = ms => sleep(ms / (tempo * speedMul));
   async function click(c) {
-    c.el.classList.add('down'); ping(c.x, c.y); sfx.press(c.x, W);
+    c.el.classList.add('down'); ping(c.x, c.y);
     await wait(70);
     c.el.classList.remove('down');
   }
-  const placed = (r, kind) => sfx.place({ ...r, y: r.y - scrollY }, W, H, kind);
+  const placed = () => {};
 
   // ── 눈금자와 안내선 ─────────────────────────────
   const rulers = make('intro-rulers');
@@ -417,7 +323,7 @@ export async function runIntro({ key, steps }) {
     try {
       await moveTo(c, 10, scrollY + H * rand(.35, .55));
       if (done) return gl;
-      c.el.classList.add('down'); sfx.press(c.x, W);
+      c.el.classList.add('down');
       shape(c, 'move');
       gl.style.opacity = 1;
       await moveTo(c, gx, c.y, { drag: true, bend: 0, speed: .7, onStep: () => place(gl, { x: c.x, y: top, w: 1, h }) });
@@ -437,7 +343,7 @@ export async function runIntro({ key, steps }) {
     shape(c, 'cross');
     await moveTo(c, r.x, r.y);
     if (done) return;
-    c.el.classList.add('down'); sfx.press(c.x, W);
+    c.el.classList.add('down');
     const b = selBox({ ...r, w: 0, h: 0 }, { handles: false, ph });
     await moveTo(c, r.x + r.w, r.y + r.h, { speed: .75, drag: true, bend: 0, onStep: () => b.set({ x: r.x, y: r.y, w: Math.max(0, c.x - r.x), h: Math.max(0, c.y - r.y) }) });
     c.el.classList.remove('down');
@@ -459,7 +365,7 @@ export async function runIntro({ key, steps }) {
     shape(c, 'cross'); shape(h, 'cross');
     await Promise.all([moveTo(c, mx - 2, my - 2), moveTo(h, mx + 2, my + 2)]);
     if (!done) {
-      c.el.classList.add('down'); h.el.classList.add('down'); sfx.press(mx, W);
+      c.el.classList.add('down'); h.el.classList.add('down');
       const b = selBox({ x: mx, y: my, w: 0, h: 0 }, { handles: false, ph: 'ph' });
       const upd = () => b.set({ x: Math.min(c.x, h.x), y: Math.min(c.y, h.y), w: Math.abs(h.x - c.x), h: Math.abs(h.y - c.y) });
       await Promise.all([moveTo(c, r.x, r.y, { drag: true, bend: 0, speed: .7, onStep: upd }), moveTo(h, r.x + r.w, r.y + r.h, { drag: true, bend: 0, speed: .7, onStep: upd })]);
@@ -502,7 +408,7 @@ export async function runIntro({ key, steps }) {
         const cr = rg.getBoundingClientRect();
         place(caret, { x: cr.right, y: cr.top + scrollY, w: 2, h: cr.height || 16 });
         c.tx = cr.right + 8; c.ty = cr.top + scrollY + (cr.height || 16) * .7; c.mode = 'move';
-        sfx.key(c.x, W, ch === ' ');
+       
         let d = per * rand(.5, 1.5) * (ch === ' ' ? 1.6 : 1);
         if (Math.random() < .025) d += rand(80, 200);
         await sleep(d / (tempo * speedMul));
@@ -528,7 +434,7 @@ export async function runIntro({ key, steps }) {
     shape(c, 'cross');
     await moveTo(c, r.x + dx, r.y);
     if (done) return;
-    c.el.classList.add('down'); sfx.press(c.x, W);
+    c.el.classList.add('down');
     const lh = Math.min(r.h, (grow ? 18 / fs : 1) * fs * 1.3);
     const b = selBox({ x: r.x + dx, y: r.y, w: 0, h: 0 }, { handles: false });
     await moveTo(c, r.x + dx + r.w * (grow ? .45 : 1), r.y + lh, { speed: .9, drag: true, bend: 0, onStep: () => b.set({ x: r.x + dx, y: r.y, w: Math.max(0, c.x - r.x - dx), h: Math.max(0, c.y - r.y) }) });
@@ -542,7 +448,7 @@ export async function runIntro({ key, steps }) {
       const sizes = [24, 32, 40, 48, 56, 64, 72, 88, 104].filter(v => v > 18 && v < fs).concat(fs);
       const sel = selBox({ x: r.x + dx, y: r.y, w: r.w, h: r.h }, { handles: true });
       let k = 0;
-      for (const v of sizes) { if (done) break; cl.n.style.scale = String(v / fs); sel.set({ x: r.x + dx, y: r.y, w: r.w * v / fs, h: r.h * v / fs }); sfx.grow(k++, c.x, W); await wait(60); }
+      for (const v of sizes) { if (done) break; cl.n.style.scale = String(v / fs); sel.set({ x: r.x + dx, y: r.y, w: r.w * v / fs, h: r.h * v / fs }); await wait(60); }
       await wait(150);
       sel.remove();
     }
@@ -555,7 +461,7 @@ export async function runIntro({ key, steps }) {
       await moveTo(c, ax - dx - rand(2, 5), ay, {
         speed: .6, drag: true, onStep: () => {
           let off = c.x - (ax - dx);
-          if (Math.abs(off) < 9) { if (!snapped) { snapped = true; gl.classList.add('flash'); sfx.snap(c.x, W); } off = 0; }
+          if (Math.abs(off) < 9) { if (!snapped) { snapped = true; gl.classList.add('flash'); } off = 0; }
           cl.move(r.x + off, r.y);
         },
       });
@@ -643,7 +549,7 @@ export async function runIntro({ key, steps }) {
     shape(c, 'cross');
     await moveTo(c, r.x, r.y);
     if (done) return;
-    c.el.classList.add('down'); sfx.press(c.x, W);
+    c.el.classList.add('down');
     const b = selBox({ ...r, w: 0, h: 0 }, { handles: false });
     await moveTo(c, r.x + r.w, r.y + r.h, { speed: .75, drag: true, bend: 0, onStep: () => b.set({ x: r.x, y: r.y, w: Math.max(0, c.x - r.x), h: Math.max(0, c.y - r.y) }) });
     c.el.classList.remove('down');
@@ -677,7 +583,7 @@ export async function runIntro({ key, steps }) {
   await sleep(700);
   if (done) return;
   logo.animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 1.6 }], { duration: 380, easing: 'ease-in', fill: 'forwards' });
-  sfx.arp(W);
+ 
   for (const c of cursors) {
     // 바깥으로 한 번 퍼졌다가 일하러 간다
     const a = Math.atan2(c.y - scrollY - cy, c.x - cx);
@@ -697,7 +603,7 @@ export async function runIntro({ key, steps }) {
   //    자동 스크롤은 할 일이 적으면 내려가고, 밀리면 늦추거나 멈춘다.
   //    직접 스크롤하면 잠시 자동을 멈추고 따라가며, 빨리 내릴수록 커서가 합류한다.
   const maxScroll = Math.max(0, D - H);
-  const SPEED = mob ? 170 : 220;
+  const SPEED = mob ? 340 : 460;
   const running = [];
   let ti = 0, pos = scrollY, last = performance.now(), vel = 0, frontier = pos + H, prevY = scrollY, sv = 0, userAt = -1e9, joinAt = 0;
   const pending = [];
@@ -712,7 +618,7 @@ export async function runIntro({ key, steps }) {
       while (ti < tour.length && tour[ti].r.y < frontier) pending.push(tour[ti++]);
       const avail = pending.filter(s => !s.started && (!s.master || s.master.done));
       const backlog = pending.filter(s => !s.done).length;
-      tempo = clamp(1.15 + sv / 900 + (avail.length / cursors.length) * .5, 1.15, 2.4);
+      tempo = clamp(1.15 + sv / 900 + (avail.length / cursors.length) * .6, 1.5, 3);
       // 빨리 내리면 화면 옆에서 커서가 합류한다
       if (sv > 900 && now > joinAt && cursors.length < MAX && avail.length > cursors.filter(c => !c.busy).length + 1) { addCursor(true); joinAt = now + 260; }
       // 쉬는 커서에게 화면 안에서 가까운 일부터 준다
@@ -729,7 +635,7 @@ export async function runIntro({ key, steps }) {
         running.push(run(c, best));
       }
       const userActive = now - userAt < 2500;
-      const want = !tourOn || userActive ? 0 : backlog <= Math.max(4, cursors.length * .6) ? SPEED : backlog <= cursors.length * 1.5 ? SPEED * .35 : 0;
+      const want = !tourOn || userActive ? 0 : backlog <= Math.max(4, cursors.length * .6) ? SPEED : backlog <= cursors.length * 2 ? SPEED * .6 : SPEED * .25;
       vel += (want - vel) * Math.min(1, dt * 2.5);
       if (!userActive && pos < maxScroll && vel > 1) {
         pos = Math.min(maxScroll, pos + vel * dt);
@@ -745,12 +651,12 @@ export async function runIntro({ key, steps }) {
 
   // 3) 끝: 화음과 함께 커서들이 마우스 쪽으로 무리 지어 모였다가 흩어지고 덮개가 걷힌다
   tempo = 1;
-  sfx.chord(W);
+ 
   flock = true;
   for (const c of cursors) { c.vx = rand(-3, 3); c.vy = rand(-3, 3); c.mode = 'flock'; shape(c, 'arrow'); }
   await sleep(1800);
   if (done) return;
-  sfx.fall(W);
+ 
   const sy = scrollY;
   for (const c of cursors) {
     const a = Math.atan2(c.y - sy - cy, c.x - cx) + (Math.random() - .5) * .6, far = Math.hypot(W, H);
