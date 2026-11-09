@@ -221,48 +221,35 @@ export async function runIntro({ key, steps }) {
   await Promise.all(firstJobs);
   if (done) return;
 
-  // 2) 스크롤하며 아래쪽을 차례로 만든다
-  pace = .42;
+  // 2) 일정한 속도로 천천히 내려가며, 화면에 들어오는 칸부터 차례로 만든다
+  pace = .6;
   const maxScroll = Math.max(0, D - H);
-  function scrollToward(y) {
-    const from = scrollY, to = Math.max(0, Math.min(maxScroll, y));
-    const dist = Math.abs(to - from);
-    if (dist < 4) return Promise.resolve();
-    const dur = Math.min(750, 220 + dist * .35), s = performance.now();
-    return new Promise(res => {
-      const step = () => {
-        if (done) return res();
-        const p = Math.min(1, (performance.now() - s) / dur);
-        scrollTo({ top: from + (to - from) * ease(p), behavior: 'instant' });
-        if (p < 1) requestAnimationFrame(step); else res();
-      };
-      step();
-    });
-  }
-  const free = async () => {
-    for (;;) {
-      if (done) return null;
-      const c = cursors.find(c => !c.busy);
-      if (c) return c;
-      await sleep(60);
-    }
-  };
-  const running = [];
-  for (const s of tour) {
-    if (done) return;
-    // 아직 화면 아래에 있으면 그만큼 내려간다
-    if (s.r.y + Math.min(s.r.h, H * .5) > scrollY + H * .88) {
-      // 지금 화면에서 하던 일을 마저 끝내고 내려간다
-      await Promise.race([Promise.all(running), sleep(650)]);
-      if (done) return;
-      await scrollToward(s.r.y - H * .2);
-    }
-    const c = await free();
-    if (!c) return;
-    running.push(run(c, s));
-    await sleep(150 * pace);
-  }
-  await scrollToward(maxScroll);
+  const SPEED = mob ? 170 : 220;          // 초당 픽셀
+  const queue = [], running = [];
+  let ti = 0, pos = scrollY, last = performance.now(), vel = 0;
+  await new Promise(res => {
+    const tick = now => {
+      if (done) return res();
+      const dt = Math.min(.25, (now - last) / 1000); last = now;
+      // 화면 아래쪽 80% 지점까지 들어온 칸을 작업 목록에 넣는다
+      while (ti < tour.length && tour[ti].r.y < pos + H * .8) queue.push(tour[ti++]);
+      // 쉬는 커서에게 일을 준다
+      for (const c of cursors) {
+        if (!queue.length) break;
+        if (!c.busy) running.push(run(c, queue.shift()));
+      }
+      // 일이 밀리면 천천히, 아니면 정해진 속도로. 출발과 도착은 부드럽게
+      const backlog = queue.length;
+      const want = backlog > 2 ? SPEED * .15 : backlog > 0 ? SPEED * .5 : SPEED;
+      const near = Math.min(1, (maxScroll - pos) / (H * .5));
+      vel += (want * Math.max(.15, near) - vel) * Math.min(1, dt * 2.5);
+      pos = Math.min(maxScroll, pos + vel * dt);
+      scrollTo({ top: pos, behavior: 'instant' });
+      if (pos >= maxScroll - .5 && ti >= tour.length && !queue.length) return res();
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
   await Promise.all(running);
   if (done) return;
   await sleep(300);
