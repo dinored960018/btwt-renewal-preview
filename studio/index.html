@@ -260,6 +260,7 @@ try {
   </div>
   <div class="foot-links">
     <ul>
+      <li><a href="?intro" data-replay>다시 보기</a></li>
       <li><a href="../games/">GAMES</a></li>
       <li><a href="../careers.html">채용 안내</a></li>
       <li><a href="../support.html">고객센터</a></li>
@@ -387,6 +388,22 @@ if (introWanted()) runIntro({ key: 'studio', steps: [
   { at: 2700, sel: '.intro-copy > p:not(.fine)', kind: 'block' },
   { at: 2900, sel: '.acts', kind: 'block' },
   { at: 3100, sel: '.fine', kind: 'block' },
+  { sel: '#skills-title', kind: 'type', n: 15 },
+  { sel: '#skills .lede', kind: 'block' },
+  { sel: '.rack', kind: 'block', dir: 'y' },
+  { sel: '.app', kind: 'block', dir: 'y' },
+  { sel: '#why-title', kind: 'type', n: 5 },
+  { sel: '#why-title + .lede', kind: 'block' },
+  { sel: '#flow-title', kind: 'type', n: 11 },
+  { sel: '.flow li', all: true, kind: 'block', dir: 'y' },
+  { sel: '#features-title', kind: 'type', n: 8 },
+  { sel: '.good', all: true, kind: 'block', dir: 'y' },
+  { sel: '#range-title', kind: 'type', n: 5 },
+  { sel: '.range', kind: 'block', dir: 'y' },
+  { sel: '.reach > div', all: true, kind: 'block', dir: 'y' },
+  { sel: '.foot-art > div', all: true, kind: 'block', dir: 'y' },
+  { sel: '.foot-links', kind: 'block' },
+  { sel: '.copy', kind: 'block' },
 ] });
 </script>
 </body>

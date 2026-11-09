@@ -90,7 +90,6 @@ html:has(body.paper){scrollbar-color:#000 #fff}
 /* 페이지 첫 방문 등장 효과 */
 #intro{position:fixed;inset:0;z-index:60;overflow:hidden;background:var(--bg)}
 html:not(.intro-on) #intro{display:none}
-html.intro-on,html.intro-on body{overflow:hidden}
 .intro-paint{position:absolute;inset:0;display:block}
 .intro-ui{position:absolute;inset:0;pointer-events:none;mix-blend-mode:difference}
 .intro-cur{position:absolute;left:0;top:0;width:20px;height:24px;will-change:transform;transition:scale .12s}

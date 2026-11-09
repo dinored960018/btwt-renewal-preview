@@ -170,6 +170,7 @@ a.item .state{background:var(--fg);color:var(--bg);border-color:var(--fg)}
   </div>
   <div class="foot-links">
     <ul>
+      <li><a href="?intro" data-replay>다시 보기</a></li>
       <li><a href="../studio/">STUDIO</a></li>
       <li><a href="../careers.html">채용 안내</a></li>
       <li><a href="../support.html">고객센터</a></li>
@@ -278,6 +279,19 @@ if (introWanted()) runIntro({ key: 'games', steps: [
   { at: 2600, sel: '.buy .tag', kind: 'block' },
   { at: 2750, sel: '.buy p', kind: 'block' },
   { at: 3000, sel: '.buy-act', kind: 'block' },
+  { sel: '#archive-title', kind: 'type', n: 7 },
+  { sel: '.shelf .item', all: true, kind: 'block', dir: 'y' },
+  { sel: '#look-title', kind: 'type', n: 10 },
+  { sel: '.look-stage', kind: 'block', dir: 'y' },
+  { sel: '.callsigns', kind: 'block' },
+  { sel: '.look-copy', kind: 'block' },
+  { sel: '.look-side .spec', kind: 'block', dir: 'y' },
+  { sel: '.look-side .btn', kind: 'block' },
+  { sel: '#careers-title', kind: 'type', n: 2 },
+  { sel: '.jobs li', all: true, kind: 'block' },
+  { sel: '.foot-art > div', all: true, kind: 'block', dir: 'y' },
+  { sel: '.foot-links', kind: 'block' },
+  { sel: '.copy', kind: 'block' },
 ] });
 </script>
 </body>
