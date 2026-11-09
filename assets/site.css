@@ -128,3 +128,6 @@ html:not(.intro-on) #intro{display:none}
 .intro-hud .grp button+button{border-left:0}
 .intro-hud button[aria-pressed=true]{background:#000;color:#fff}
 @media (max-width:720px){.intro-hud{bottom:10px;max-width:calc(100% - 20px);overflow-x:auto;font-size:12px}.intro-hud .st{display:none}}
+
+.intro-cur{transition:scale .12s,opacity .3s}
+.intro-cur.rest{opacity:.4;scale:.8}

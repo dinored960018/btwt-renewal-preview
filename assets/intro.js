@@ -300,8 +300,8 @@ export async function runIntro({ key, steps }) {
   addEventListener('pointermove', e => { mouse = { x: e.clientX, y: e.clientY }; }, { passive: true });
 
   // ── 커서 ─────────────────────────────
-  const MAX = mob ? 12 : 20;
-  const START_N = mob ? 8 : 12;
+  const MAX = mob ? 8 : 12;
+  const START_N = mob ? 5 : 8;
   const cx = W / 2, cy = H / 2;
   let tempo = 1;
   const cursors = [];
@@ -328,16 +328,21 @@ export async function runIntro({ key, steps }) {
 
   const t0 = performance.now();
   let flock = false;
+  const idleRank = new Map();
   function frame(now) {
     const t = (now - t0) / 1000, sy = scrollY;
+    idleRank.clear();
+    for (const c of cursors) if (c.mode === 'idle') idleRank.set(c, idleRank.size);
     for (const c of cursors) {
+      c.el.classList.toggle('rest', c.mode === 'idle');
       if (c.mode === 'orbit') {
         c.tx = cx + Math.cos(t * c.sp + c.ph) * c.r;
         c.ty = sy + cy + Math.sin(t * c.sp + c.ph) * c.r * .8;
       } else if (c.mode === 'idle') {
-        // 쉬는 커서는 지금 화면 안을 느긋하게 돌아다닌다
-        if (now > c.next) { c.ix = rand(W * .17, W * .83); c.iy = rand(H * .2, H * .8); c.next = now + rand(900, 2400); }
-        c.tx += (c.ix - c.tx) * .03; c.ty += (sy + c.iy - c.ty) * .03;
+        // 쉬는 커서는 화면 오른쪽 가장자리에 한 줄로 줄 서서 기다린다
+        const k = idleRank.get(c) ?? 0;
+        c.tx += (W - (mob ? 22 : 34) - c.tx) * .08;
+        c.ty += (sy + H * .5 + (k - (idleRank.size - 1) / 2) * 26 + Math.sin(t * 1.6 + k) * 2 - c.ty) * .08;
       } else if (c.mode === 'flock') {
         // 무리 짓기: 마우스(없으면 화면 가운데)를 향해 모이되 서로 부딪히지 않고 같은 방향으로 흐른다
         const goal = mouse ? { x: mouse.x, y: sy + mouse.y } : { x: cx, y: sy + cy };
@@ -709,7 +714,7 @@ export async function runIntro({ key, steps }) {
       const backlog = pending.filter(s => !s.done).length;
       tempo = clamp(1.15 + sv / 900 + (avail.length / cursors.length) * .5, 1.15, 2.4);
       // 빨리 내리면 화면 옆에서 커서가 합류한다
-      if (sv > 900 && now > joinAt && cursors.length < MAX) { addCursor(true); joinAt = now + 260; }
+      if (sv > 900 && now > joinAt && cursors.length < MAX && avail.length > cursors.filter(c => !c.busy).length + 1) { addCursor(true); joinAt = now + 260; }
       // 쉬는 커서에게 화면 안에서 가까운 일부터 준다
       for (const c of cursors) {
         if (c.busy || c.mode === 'orbit') continue;
