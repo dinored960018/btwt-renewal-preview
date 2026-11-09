@@ -86,3 +86,18 @@ html:has(body.paper){scrollbar-color:#000 #fff}
   .btn{width:100%}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* 페이지 첫 방문 등장 효과 */
+#intro{position:fixed;inset:0;z-index:60;overflow:hidden;background:var(--bg)}
+html:not(.intro-on) #intro{display:none}
+html.intro-on,html.intro-on body{overflow:hidden}
+.intro-paint{position:absolute;inset:0;display:block}
+.intro-ui{position:absolute;inset:0;pointer-events:none;mix-blend-mode:difference}
+.intro-cur{position:absolute;left:0;top:0;width:20px;height:24px;will-change:transform;transition:scale .12s}
+.intro-cur svg{display:block}
+.intro-cur.down{scale:.86}
+.intro-box{position:absolute;left:0;top:0;border:1px solid #fff}
+.intro-badge{position:absolute;left:0;top:0;padding:2px 7px;background:#fff;color:#000;font-size:11px;font-weight:500;line-height:1.5;white-space:nowrap;font-variant-numeric:tabular-nums}
+.intro-caret{position:absolute;left:0;top:0;width:2px;background:#fff;animation:introBlink .7s steps(2) infinite}
+@keyframes introBlink{50%{opacity:0}}
+.intro-skip{position:absolute;right:var(--gutter);bottom:var(--gutter);z-index:2;min-height:44px;padding:0 16px;background:#fff;color:#000;border:0;font:inherit;font-size:14px;font-weight:500;cursor:pointer;mix-blend-mode:difference}

@@ -10,14 +10,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500&text=%E9%BB%91%E5%85%94%E7%99%BD&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css">
-<script>
-// 첫 방문에만 등장 효과. 움직임 줄이기 설정이면 건너뛴다. ?intro 로 다시 볼 수 있다.
-try {
-  var q = location.search;
-  if (/[?&]intro\b/.test(q) || (!/[?&]nointro\b/.test(q) && !sessionStorage.getItem('btwt-intro') && !matchMedia('(prefers-reduced-motion:reduce)').matches))
-    document.documentElement.classList.add('intro-on');
-} catch (e) {}
-</script>
 <style>
 html,body{height:100%}
 body{overflow:hidden}
@@ -45,19 +37,6 @@ body{overflow:hidden}
 .rail ul{display:flex;gap:18px;list-style:none}
 .rail a{line-height:32px}
 .rail a:hover{text-decoration:underline;text-underline-offset:4px}
-/* 등장 효과 덮개 */
-#intro{position:fixed;inset:0;z-index:50;background:#000;overflow:hidden}
-html:not(.intro-on) #intro{display:none}
-.intro-paint{position:absolute;inset:0;display:block}
-.intro-ui{position:absolute;inset:0;pointer-events:none;mix-blend-mode:difference}
-.intro-cur{position:absolute;left:0;top:0;width:20px;height:24px;will-change:transform;transition:scale .12s}
-.intro-cur svg{display:block}
-.intro-cur.down{scale:.86}
-.intro-box{position:absolute;left:0;top:0;border:1px solid #fff}
-.intro-badge{position:absolute;left:0;top:0;padding:2px 7px;background:#fff;color:#000;font-size:11px;font-weight:500;line-height:1.5;white-space:nowrap;font-variant-numeric:tabular-nums}
-.intro-caret{position:absolute;left:0;top:0;width:2px;background:#fff;animation:introBlink .7s steps(2) infinite}
-@keyframes introBlink{50%{opacity:0}}
-.intro-skip{position:absolute;right:var(--gutter);top:12px;z-index:2;min-height:44px;padding:0 16px;background:#fff;color:#000;border:0;font:inherit;font-size:14px;font-weight:500;cursor:pointer;mix-blend-mode:difference}
 @media (max-width:720px){
   /* 위에서 아래로: 로고 / GAMES / 소개 / 토끼 / 소개 / STUDIO */
   .gate{--bar:60px}
@@ -87,7 +66,6 @@ html:not(.intro-on) #intro{display:none}
 </style>
 </head>
 <body class="ink">
-<div id="intro" aria-hidden="true"><div class="intro-ui"></div><button class="intro-skip" type="button" tabindex="-1">건너뛰기</button></div>
 <main class="gate" id="gate">
   <h1 class="sr">검은토끼흰토끼</h1>
 
@@ -128,7 +106,6 @@ html:not(.intro-on) #intro{display:none}
 
 <script type="module">
 import { applyBrandName } from './assets/site.js';
-import { introWanted, runIntro } from './assets/intro.js';
 applyBrandName();
 
 const gate = document.getElementById('gate');
@@ -162,7 +139,6 @@ function fitWords() {
 fitWords();
 document.fonts?.ready.then(fitWords);
 addEventListener('resize', fitWords);
-if (introWanted()) document.fonts?.ready.then(() => { fitWords(); runIntro(); });
 
 // 반전 경계선: 포인터 쪽으로 넓어진다
 let cur = 50, goal = 50, raf = 0;
@@ -174,7 +150,7 @@ function paint() {
 function aim(v) { goal = v; if (!raf) raf = requestAnimationFrame(paint); }
 
 addEventListener('pointermove', e => {
-  if (small.matches || e.pointerType === 'touch' || document.documentElement.classList.contains('intro-on')) return;
+  if (small.matches || e.pointerType === 'touch') return;
   const t = e.clientX / innerWidth;
   // 포인터가 있는 쪽 칸이 넓어진다: 왼쪽이면 경계가 오른쪽으로
   aim(50 + (t < .5 ? 1 : -1) * (6 + 12 * Math.abs(t - .5) * 2));

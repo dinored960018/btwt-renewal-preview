@@ -10,6 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500&text=%E9%BB%91%E5%85%94%E7%99%BD&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/site.css">
+<script>
+// 첫 방문에만 등장 효과. 움직임 줄이기 설정, 페이지 안 링크(#)로 들어온 경우는 건너뛴다. ?intro 로 다시 볼 수 있다.
+try {
+  var q = location.search;
+  if (/[?&]intro\b/.test(q) || (!/[?&]nointro\b/.test(q) && !location.hash && !sessionStorage.getItem('btwt-intro-studio') && !matchMedia('(prefers-reduced-motion:reduce)').matches))
+    document.documentElement.classList.add('intro-on');
+} catch (e) {}
+</script>
 <style>
 /* 첫 화면 */
 .intro{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);min-height:calc(100dvh - 73px);border-bottom:1px solid var(--fg)}
@@ -118,6 +126,7 @@
 </style>
 </head>
 <body class="paper">
+<div id="intro" aria-hidden="true"><div class="intro-ui"></div><button class="intro-skip" type="button" tabindex="-1">건너뛰기</button></div>
 <a class="skip" href="#main">본문으로 건너뛰기</a>
 <header class="top">
   <nav aria-label="사업"><a href="../games/">GAMES</a><a href="../studio/" aria-current="page">STUDIO</a></nav>
@@ -366,6 +375,19 @@ $('contact').addEventListener('submit', e => {
   location.href = `mailto:${STUDIO_LINKS.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   msg.textContent = '메일 앱을 열었습니다. 열리지 않으면 ' + STUDIO_LINKS.contactEmail + ' 로 보내 주세요.';
 });
+</script>
+<script type="module">
+import { introWanted, runIntro } from '../assets/intro.js';
+if (introWanted()) runIntro({ key: 'studio', steps: [
+  { at: 800, sel: '.top', kind: 'block' },
+  { at: 900, sel: '.intro-art', kind: 'paint', fill: '#000' },
+  { at: 1600, sel: '.intro-art img', kind: 'block', dir: 'y' },
+  { at: 1700, sel: '.intro h1', kind: 'type', n: 10 },
+  { at: 2100, sel: '.intro-word', kind: 'type', n: 6 },
+  { at: 2700, sel: '.intro-copy > p:not(.fine)', kind: 'block' },
+  { at: 2900, sel: '.acts', kind: 'block' },
+  { at: 3100, sel: '.fine', kind: 'block' },
+] });
 </script>
 </body>
 </html>
