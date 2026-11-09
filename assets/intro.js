@@ -29,7 +29,6 @@ export async function runIntro({ key, steps }) {
     root.classList.remove('intro-on');
     setTimeout(() => { cancelAnimationFrame(raf); ov.remove(); }, fast ? 210 : 460);
   }
-  ov.querySelector('.intro-skip')?.addEventListener('click', () => finish(true));
   addEventListener('keydown', e => { if (e.key === 'Escape') finish(true); });
   // 화면 폭이 바뀌면 잰 위치가 틀어지므로 바로 끝낸다 (모바일 주소창 높이 변화는 무시)
   const startW = innerWidth;
