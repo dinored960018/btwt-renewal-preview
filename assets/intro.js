@@ -47,21 +47,23 @@ function overlap(a, b) {
 // ── 커서 모양 ─────────────────────────────
 const TIP = 'M5 3.2C4.7 2.5 5.4 1.9 6.1 2.3L20 9.1C20.8 9.5 20.7 10.6 19.8 10.8L13.6 12.4C13.1 12.5 12.7 12.9 12.6 13.4L11 19.6C10.8 20.5 9.6 20.6 9.3 19.8Z';
 const HOT = { arrow: [5, 3], dup: [5, 3], pen: [3, 3], 'pen-add': [3, 3], cross: [12, 12], ibeam: [12, 12], ew: [12, 12], ns: [12, 12] };
-function cursorArt(shape, col) {
-  const edge = 'stroke="#fff" stroke-width="1.5" stroke-linejoin="round"';
-  const plus = (x, y) => `<g stroke-linecap="round"><path d="M${x} ${y - 3.5}V${y + 3.5}M${x - 3.5} ${y}H${x + 3.5}" stroke="#fff" stroke-width="3.4"/><path d="M${x} ${y - 3.5}V${y + 3.5}M${x - 3.5} ${y}H${x + 3.5}" stroke="#1E1E1E" stroke-width="1.3"/></g>`;
+let INK = '#000', PAPER = '#fff';   // 커서는 흑백: 밝은 페이지엔 검은 커서, 어두운 페이지엔 흰 커서
+function cursorArt(shape) {
+  const col = INK, W = PAPER;
+  const edge = `stroke="${W}" stroke-width="1.5" stroke-linejoin="round"`;
+  const plus = (x, y) => `<g stroke-linecap="round"><path d="M${x} ${y - 3.5}V${y + 3.5}M${x - 3.5} ${y}H${x + 3.5}" stroke="${W}" stroke-width="3.4"/><path d="M${x} ${y - 3.5}V${y + 3.5}M${x - 3.5} ${y}H${x + 3.5}" stroke="${col}" stroke-width="1.3"/></g>`;
   switch (shape) {
     case 'arrow': return `<path d="${TIP}" fill="${col}" ${edge}/>`;
-    case 'dup': return `<path d="${TIP}" transform="translate(4 3.5)" fill="#fff" stroke="${col}" stroke-width="1.3" stroke-linejoin="round"/><path d="${TIP}" fill="${col}" ${edge}/>`;
+    case 'dup': return `<path d="${TIP}" transform="translate(4 3.5)" fill="${W}" stroke="${col}" stroke-width="1.3" stroke-linejoin="round"/><path d="${TIP}" fill="${col}" ${edge}/>`;
     case 'pen':
     case 'pen-add': {
-      const s = `<path d="M3 3L13.5 6.6L17.2 10.4L10.4 17.2L6.6 13.5Z" fill="${col}" ${edge}/><path d="M17.2 10.4L20.4 13.6L13.6 20.4L10.4 17.2Z" fill="${col}" ${edge}/><path d="M3.6 3.6L8.6 8.6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/><circle cx="9.9" cy="9.9" r="1.7" fill="none" stroke="#fff" stroke-width="1.2"/>`;
+      const s = `<path d="M3 3L13.5 6.6L17.2 10.4L10.4 17.2L6.6 13.5Z" fill="${col}" ${edge}/><path d="M17.2 10.4L20.4 13.6L13.6 20.4L10.4 17.2Z" fill="${col}" ${edge}/><path d="M3.6 3.6L8.6 8.6" stroke="${W}" stroke-width="1.2" stroke-linecap="round"/><circle cx="9.9" cy="9.9" r="1.7" fill="none" stroke="${W}" stroke-width="1.2"/>`;
       return shape === 'pen-add' ? s + plus(23, 23) : s;
     }
-    case 'cross': return `<g stroke-linecap="round"><path d="M12 3.5V20.5M3.5 12H20.5" stroke="#fff" stroke-width="3.6"/><path d="M12 3.5V20.5M3.5 12H20.5" stroke="${col}" stroke-width="1.5"/></g>`;
+    case 'cross': return `<g stroke-linecap="round"><path d="M12 3.5V20.5M3.5 12H20.5" stroke="${W}" stroke-width="3.6"/><path d="M12 3.5V20.5M3.5 12H20.5" stroke="${col}" stroke-width="1.5"/></g>`;
     case 'ibeam': {
       const d = 'M8.6 4.6H10.4Q12 4.6 12 6.2Q12 4.6 13.6 4.6H15.4M12 6.2V17.8M8.6 19.4H10.4Q12 19.4 12 17.8Q12 19.4 13.6 19.4H15.4';
-      return `<g fill="none" stroke-linecap="round"><path d="${d}" stroke="#fff" stroke-width="3.6"/><path d="${d}" stroke="${col}" stroke-width="1.5"/></g>`;
+      return `<g fill="none" stroke-linecap="round"><path d="${d}" stroke="${W}" stroke-width="3.6"/><path d="${d}" stroke="${col}" stroke-width="1.5"/></g>`;
     }
     case 'ew':
     case 'ns': return `<path d="M2.5 12L7.2 7.4V10.3H16.8V7.4L21.5 12L16.8 16.6V13.7H7.2V16.6Z"${shape === 'ns' ? ' transform="rotate(90 12 12)"' : ''} fill="${col}" ${edge}/>`;
@@ -660,6 +662,7 @@ const STYLE = `
 .badge{position:absolute;transform:translate(-50%);padding:1px 4px;border-radius:2px;color:#fff;font:600 11px/16px Paperlogy,system-ui,sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums}
 .cursor{position:absolute;left:0;top:0;will-change:transform}
 .cursor svg{position:absolute;overflow:visible;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.28))}
+.hud .dots i{background:#fff!important;color:#000!important}
 .rulers{position:absolute;inset:0;pointer-events:none}
 .ruler{position:absolute;background:#2c2c2c}
 .ruler svg{display:block}
@@ -743,7 +746,9 @@ export async function runIntro({ key }) {
     V.bg.style.backgroundColor = bg.color;
     if (bg.image !== 'none') Object.assign(V.bg.style, { backgroundImage: bg.image, backgroundSize: bg.size, backgroundPosition: bg.position, backgroundRepeat: bg.repeat });
     const rgb = (bg.color.match(/[\d.]+/g) || [255, 255, 255]).map(Number);
-    host.style.setProperty('--ph', (.2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2]) / 255 < .4 ? '#3B3D42' : '#D9D9D9');
+    const dark = (.2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2]) / 255 < .4;
+    host.style.setProperty('--ph', dark ? '#3B3D42' : '#D9D9D9');
+    INK = dark ? '#fff' : '#000'; PAPER = dark ? '#000' : '#fff';
     const fav = [...document.querySelectorAll('link[rel~="icon"],link[rel="apple-touch-icon"]')].map(l => l.href).filter(Boolean)[0];
     if (fav) V.logo.innerHTML = `<img src="${fav}" alt="">`;
 
@@ -1381,7 +1386,7 @@ export async function runIntro({ key }) {
         el.style.transform = `translate(${r1(X)}px,${r1(Y)}px)`;
         const svg = el.firstChild;
         if (el._shape !== c.shape) {
-          svg.innerHTML = cursorArt(c.shape, c.color);
+          svg.innerHTML = cursorArt(c.shape);
           el._shape = c.shape;
           [el._hx, el._hy] = HOT[c.shape];
           svg.style.transformOrigin = `${el._hx}px ${el._hy}px`;
