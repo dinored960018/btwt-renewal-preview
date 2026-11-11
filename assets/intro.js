@@ -675,7 +675,7 @@ const STYLE = `
 .logo.on{opacity:1;transform:translate(-50%,-50%)}
 .logo.gone{opacity:0;transform:translate(-50%,-50%) scale(.9)}
 .logo img{display:block;width:60px;height:60px;object-fit:contain;filter:grayscale(1);opacity:.42;border-radius:14px}
-.hud{position:absolute;left:50%;bottom:20px;transform:translate(-50%,18px);opacity:0;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 10px;max-width:calc(100% - 20px);background:rgba(30,30,30,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.07);font:500 12px/1 Paperlogy,system-ui,sans-serif;pointer-events:auto;transition:opacity .45s ease,transform .45s cubic-bezier(.2,.8,.2,1);white-space:nowrap;user-select:none;z-index:5}
+.hud{display:none!important;position:absolute;left:50%;bottom:20px;transform:translate(-50%,18px);opacity:0;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 10px;max-width:calc(100% - 20px);background:rgba(30,30,30,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.07);font:500 12px/1 Paperlogy,system-ui,sans-serif;pointer-events:auto;transition:opacity .45s ease,transform .45s cubic-bezier(.2,.8,.2,1);white-space:nowrap;user-select:none;z-index:5}
 .hud.on{opacity:1;transform:translate(-50%,0)}
 .hud .dots{display:flex;padding-left:5px}
 .hud .dots i{display:block;width:18px;height:18px;margin-left:-5px;border-radius:50%;border:2px solid #1e1e1e;font:600 8px/14px Paperlogy,system-ui,sans-serif;font-style:normal;text-align:center;color:#fff}
@@ -1498,6 +1498,8 @@ export async function runIntro({ key }) {
       $('[data-a="replay"]').hidden = false;
       $('[data-a="tour"]').hidden = true;
       $('[data-a="speed"]').hidden = true;
+      // 상태 표시줄이 없으니, 무리 짓기를 잠깐 보여 준 뒤 저절로 진짜 페이지로 돌아간다
+      setTimeout(() => { if (!A.dead) stop(true); }, 2600);
     }
     // 둘러보기: 할 일이 적으면 내려가고, 밀리면 늦추거나 멈춘다
     function tourStep(dt) {
@@ -1521,6 +1523,8 @@ export async function runIntro({ key }) {
     on(window, 'pointermove', e => { E.mouse = { x: e.clientX, y: e.clientY }; }, { passive: true });
     on(root, 'pointerleave', () => { E.mouse = null; });
     on(window, 'keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); stop(false); } }, true);
+    // 화면을 한 번 누르면 바로 끝난다 (Esc 도 같다)
+    on(host, 'click', () => stop(false));
     on(V.hud, 'click', e => {
       const b = e.target.closest('button');
       if (!b) return;
